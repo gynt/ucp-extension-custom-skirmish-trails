@@ -1,0 +1,15 @@
+meta:
+  version: 1.0.0
+options:
+- category:
+  - Custom Skirmish Trails
+  name: extreme
+  header: "Extreme Trail" # '{{extreme}}'
+  text: "Customize the extreme trail with a .csv file" # '{{extreme_descr}}'
+  display: FileInput
+  url: custom-skirmish-trails.extreme.csv.path
+  contents:
+    generalizeExtensionPaths: true
+    filter: files
+    type: string
+    value: ''
