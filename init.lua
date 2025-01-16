@@ -24,10 +24,12 @@ local function insertPostSkirmishSetupDetour()
   local detourLocation, detourSize = core.AOBScan("A1 ? ? ? ? 8D 0C 80 03 C9 89 ? ? ? ? ?"), 5
   core.detourCode(function(registers)
     if core.readInteger(memory.IS_SKIRMISH_TRAIL) ~= 1 then
+      log(2, "not in skirmish trail")
       return registers
     end
 
     if core.readInteger(memory.CURRENT_TRAIL_TYPE) ~= 2 then
+      log(2, "not in trail 2")
       return registers
     end
 
@@ -35,6 +37,8 @@ local function insertPostSkirmishSetupDetour()
 
     log(2, string.format("Committing extra parameters for extreme trail mission: %s", mission))
     interface.commitEntryExtra(REGISTRY["extremeTrail"][mission])
+
+    return registers
 
   end, detourLocation, detourSize)
 end
@@ -65,6 +69,7 @@ return {
     insertPostSkirmishSetupDetour()
 
 
+    -- detour to get the map text displayed right...
     core.detourCode(function(registers)
       if core.readInteger(memory.IS_SKIRMISH_TRAIL) ~= 1 then
         return registers
@@ -75,7 +80,8 @@ return {
       end
 
       local mission = core.readInteger(memory.EXTREME_TRAIL_PROGRESS) + 1
-      local entry = 
+      local entry = REGISTRY.extremeTrail[mission]
+      -- todo
     end, core.AOBScan("83 C2 51 52", 9))
     
   end,
