@@ -9,8 +9,17 @@ local TRAIL_TYPES = {
   [2] = "extremeTrail",
 }
 
+---@type table<string, table<number, table>>
 local REGISTRY = {
+  ["firstEditionTrail"] = nil,
+  ["warchestTrail"] = nil,
   ["extremeTrail"] = nil,
+}
+
+local TRAIL_PROGRESS_ADDRESSES = {
+  ["firstEditionTrail"] = memory.FIRST_EDITION_TRAIL_PROGRESS,
+  ["warchestTrail"] = memory.WARCHEST_TRAIL_PROGRESS,
+  ["extremeTrail"] = memory.EXTREME_TRAIL_PROGRESS,
 }
 
 
@@ -28,42 +37,63 @@ local function insertPostSkirmishSetupDetour()
       return registers
     end
 
-    if core.readInteger(memory.CURRENT_TRAIL_TYPE) ~= 2 then
-      log(2, "not in trail 2")
-      return registers
-    end
+    local trail =  core.readInteger(memory.CURRENT_TRAIL_TYPE) 
+    local trailName = TRAIL_TYPES[trail]
 
-    local mission = core.readInteger(memory.EXTREME_TRAIL_PROGRESS) + 1
+    if trailName == nil then error(string.format("invalid trail: %s", trail)) end
 
-    log(2, string.format("Committing extra parameters for extreme trail mission: %s", mission))
-    interface.commitEntryExtra(REGISTRY["extremeTrail"][mission])
+    log(2, string.format("trail: %s", trailName))
+
+    local progressAddr = TRAIL_PROGRESS_ADDRESSES[trailName]
+
+    local mission = core.readInteger(progressAddr) + 1
+
+    log(2, string.format("Committing extra parameters for trail mission: %s", mission))
+    local entry = REGISTRY[trailName][mission]
+    if entry == nil then log(-1, string.format("skirmish trail (%s) entry is unexpectedly nil: %s", trailName, mission)) end
+    interface.commitEntryExtra(entry)
 
     return registers
 
   end, detourLocation, detourSize)
 end
 
+local function applyTrail(trailName, path, missions, limit)
+  local result, err = input.readCSV(path, limit)
+  if result == nil then error(err) end
+  
+  local f = io.open(string.format("ucp/.cache/custom-skirmish-trails-config-%s.yml", trailName), 'w')
+  f:write(yaml.dump(result))
+  f:close()
+
+  REGISTRY[trailName] = result
+  
+  for index, entry in pairs(REGISTRY[trailName]) do
+    interface.commitEntry(missions, index, entry)
+  end
+end
 
 return {
   enable = function(self, config)
     local _, skirmishTrailMissions, extremeTrailMissions, warchestTrailMissions = utils.AOBExtract("8D ? I(? ? ? ?) 75 08 8D ? I(? ? ? ?) EB 0B 83 F9 01 75 06 8D ? I(? ? ? ?) 53")
 
     hooks.registerHookCallback("afterInit", function()
-      local extremePath = config.extreme.csv.path
+      local extremePath = config.extremetrail.csv.path
       if extremePath and extremePath ~= "" then
-        local result, err = input.readCSV(extremePath, 20)
-        if result == nil then error(err) end
-        local f = io.open("ucp/.cache/custom-skirmish-trails-config.yml", 'w')
-        f:write(yaml.dump(result))
-        f:close()
-        REGISTRY["extremeTrail"] = result
-        self.REGISTRY = REGISTRY -- debug line
-
-        for index, entry in pairs(REGISTRY["extremeTrail"]) do
-          interface.commitEntry(extremeTrailMissions, index, entry)
-        end
+        applyTrail("extremeTrail", extremePath, extremeTrailMissions, 20)
       end
 
+      local firsteditionPath = config.firstedition.csv.path
+      if firsteditionPath and firsteditionPath ~= "" then
+        applyTrail("firstEditionTrail", firsteditionPath, skirmishTrailMissions, 50)
+      end
+
+      local warchestPath = config.warchest.csv.path
+      if warchestPath and warchestPath ~= "" then
+        applyTrail("warchestTrail", warchestPath, warchestTrailMissions, 20) -- todo: check
+      end
+
+      self.REGISTRY = REGISTRY -- debug line
     end)
 
     insertPostSkirmishSetupDetour()
@@ -87,13 +117,13 @@ return {
   end,
   disable = function(self, config) end,
   setTrailProgress = function(self, trail, progress)
-    if trail == 'extremeTrail' then
-      local _, progressAddr = utils.AOBExtract("A1 I(? ? ? ?) 83 F8 14 0F ? ? ? ? ?")
-      core.writeInteger(progressAddr, progress)
-
-      return
+    local progressAddr = TRAIL_PROGRESS_ADDRESSES[trail]
+    
+    if progressAddr == nil then
+      error(string.format("no such trail: %s", trail))
     end
-    error(string.format("not implemented for trail: %s", trail))
+    
+    core.writeInteger(progressAddr, progress)
   end,
 },
 {

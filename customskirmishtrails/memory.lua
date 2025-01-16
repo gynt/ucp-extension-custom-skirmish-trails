@@ -16,6 +16,8 @@ local _, isSkirmishTrailAddr = utils.AOBExtract("C7 ? I(? ? ? ?) ? ? ? ? 56 75 2
 local _, currentTrailTypeAddr = utils.AOBExtract("A1 I(? ? ? ?) 83 C6 70")
 
 local _, extremeTrailProgressAddr = utils.AOBExtract("89 ? I(? ? ? ?) E8 ? ? ? ? A1 ? ? ? ? 8B ? ? ? ? ? ? 89 ? ? ? ? ?")
+local _, warchestTrailProgressAddr = utils.AOBExtract("89 ? I(? ? ? ?) E8 ? ? ? ? 8B ? ? ? ? ? 8B ? ? ? ? ? ? 89 ? ? ? ? ?")
+local _, firstEditionTrailProgressAddr = utils.AOBExtract("8B ? I(? ? ? ?) 8B ? ? ? ? ? ? 89 ? ? ? ? ? 8B C1")
 
 return {
   STARTING_TROOPS = startingTroopsAddr,
@@ -27,4 +29,6 @@ return {
   IS_SKIRMISH_TRAIL = isSkirmishTrailAddr,
   CURRENT_TRAIL_TYPE = currentTrailTypeAddr,
   EXTREME_TRAIL_PROGRESS = extremeTrailProgressAddr,
+  WARCHEST_TRAIL_PROGRESS = warchestTrailProgressAddr,
+  FIRST_EDITION_TRAIL_PROGRESS = firstEditionTrailProgressAddr,
 }
