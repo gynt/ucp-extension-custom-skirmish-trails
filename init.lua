@@ -48,8 +48,15 @@ local function insertPostSkirmishSetupDetour()
 
     local mission = core.readInteger(progressAddr) + 1
 
-    log(2, string.format("Committing extra parameters for trail mission: %s", mission))
-    local entry = REGISTRY[trailName][mission]
+    local missions = REGISTRY[trailName]
+    if missions == nil then
+      log(2, string.format("No custom missions registered for trail name: %s", trailName))
+      return registers
+    end
+
+    log(2, string.format("Committing extra parameters for %s mission: %s", trailName, mission))
+    
+    local entry = missions[mission]
     if entry == nil then log(-1, string.format("skirmish trail (%s) entry is unexpectedly nil: %s", trailName, mission)) end
     interface.commitEntryExtra(entry)
 
@@ -90,7 +97,7 @@ return {
 
       local warchestPath = config.warchest.csv.path
       if warchestPath and warchestPath ~= "" then
-        applyTrail("warchestTrail", warchestPath, warchestTrailMissions, 20) -- todo: check
+        applyTrail("warchestTrail", warchestPath, warchestTrailMissions, 30) -- todo: check
       end
 
       self.REGISTRY = REGISTRY -- debug line
@@ -118,7 +125,7 @@ return {
   disable = function(self, config) end,
   setTrailProgress = function(self, trail, progress)
     local progressAddr = TRAIL_PROGRESS_ADDRESSES[trail]
-    
+
     if progressAddr == nil then
       error(string.format("no such trail: %s", trail))
     end

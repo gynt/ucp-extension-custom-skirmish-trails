@@ -68,6 +68,45 @@ local function setStartUnit(player, unit, count)
 
 end
 
+local EURO_RECRUITABLE_OFFSETS = {
+  ["recruitable_archers"] = 0*4,
+  ["recruitable_spearmen"] = 1*4,
+  ["recruitable_macemen"] = 2*4,
+  ["recruitable_crossbowmen"] = 3*4,
+  ["recruitable_pikemen"] = 4*4,
+  ["recruitable_swordsmen"] = 5*4,
+  ["recruitable_knights"] = 6*4,
+}
+
+local MERC_RECRUITABLE_OFFSETS = {
+  ["recruitable_arabian_bows"] = 0*4,
+  ["recruitable_slaves"] = 1*4,
+  ["recruitable_slingers"] = 2*4,
+  ["recruitable_assassins"] = 3*4,
+  ["recruitable_horse_archers"] = 4*4,
+  ["recruitable_arabian_swordsmen"] = 5*4,
+  ["recruitable_fire_throwers"] = 6*4,
+}
+
+
+local function setUnitRecruitable(unit, value)
+  local euroOffset = EURO_RECRUITABLE_OFFSETS[unit]
+  if euroOffset ~= nil then
+    local addr = MERC_RECRUITABLE_OFFSETS + euroOffset
+    log(2, string.format("setUnitRecruitable: setting %s at %X to %s", unit,  addr, value))
+    core.writeInteger(addr, value)
+  end
+
+  local mercOffset = MERC_RECRUITABLE_OFFSETS[unit]
+  if mercOffset ~= nil then
+    local addr = MERC_RECRUITABLE_OFFSETS + mercOffset
+    log(2, string.format("setUnitRecruitable: setting %s at %X to %s", unit,  addr, value))
+    core.writeInteger(addr, value)
+  end
+
+  error( string.format("unknown unit: %s", unit))
+end
+
 local PLAYER_MAPPING = {
   ["SK_RAT"] = 1,
   ["SK_SNAKE"] = 2,
@@ -92,7 +131,7 @@ local STRING_ADDRESSES = {
 }
 
 local ENTRY_OFFSETS = {
-  ["mapNameAddress"] = 0*4,
+  ["map_name"] = 0*4,
   ["fairness"] = 1*4,
   ["start_levels"] = 2*4,
   ["num_players"] = 3*4,
@@ -144,14 +183,17 @@ local function commitEntry(addr, index, entry)
     local mapNameAddress = core.allocate(mapName:len() + 1, true)
     core.writeString(mapNameAddress, mapName)
     STRING_ADDRESSES[mapName] = mapNameAddress
+
+    log(2, string.format("commitEntry: map name: %s", mapName))
   end
 
   local mapNameAddress = STRING_ADDRESSES[mapName]
   for name, value in pairs(entry) do
     
     if name == "map_name" then
-      log(2, string.format("commitEntry: map name: %s", mapName))
+      -- log(2, string.format("commitEntry: writing map name: %X", mapNameAddress))
       value = mapNameAddress
+      -- core.writeInteger(offset + ENTRY_OFFSETS["map_name"], value)
     end
 
     if value ~= nil then
@@ -178,9 +220,11 @@ local function commitEntryExtra(entry)
     end
   end
 
-  for name, offset in pairs(WEAPON_PRODUCIBLE_OFFSETS) do
+  for name, offset in pairs(WEAPON_PRODUCIBLE_OFFSETS.offsets) do
     if entry[name] ~= nil then
       setWeaponProducible(name, entry[name])
+    else
+      log(2, string.format("commitEntryExtra: no weapon producible set: %s", name))
     end
   end
 
@@ -188,6 +232,13 @@ local function commitEntryExtra(entry)
     setStartGold(entry.gold)
   end
   
+  for name, offset in pairs(EURO_RECRUITABLE_OFFSETS) do
+    setUnitRecruitable(name, entry[name])
+  end
+
+  for name, offset in pairs(MERC_RECRUITABLE_OFFSETS) do
+    setUnitRecruitable(name, entry[name])
+  end
 end
 
 

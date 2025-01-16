@@ -4,18 +4,6 @@ options:
 - category:
   - Custom Skirmish Trails
   name: extreme
-  header: "Extreme Trail" # '{{extreme}}'
-  text: "Customize the extreme trail with a .csv file" # '{{extreme_descr}}'
-  display: FileInput
-  url: custom-skirmish-trails.extremetrail.csv.path
-  contents:
-    generalizeExtensionPaths: true
-    filter: files
-    type: string
-    value: ''
-- category:
-  - Custom Skirmish Trails
-  name: extreme
   header: "First Edition Trail" # '{{extreme}}'
   text: "Customize the first trail with a .csv file" # '{{extreme_descr}}'
   display: FileInput
@@ -32,6 +20,18 @@ options:
   text: "Customize the Warchest trail with a .csv file" # '{{extreme_descr}}'
   display: FileInput
   url: custom-skirmish-trails.warchest.csv.path
+  contents:
+    generalizeExtensionPaths: true
+    filter: files
+    type: string
+    value: ''
+- category:
+  - Custom Skirmish Trails
+  name: extreme
+  header: "Extreme Trail" # '{{extreme}}'
+  text: "Customize the extreme trail with a .csv file" # '{{extreme_descr}}'
+  display: FileInput
+  url: custom-skirmish-trails.extremetrail.csv.path
   contents:
     generalizeExtensionPaths: true
     filter: files
