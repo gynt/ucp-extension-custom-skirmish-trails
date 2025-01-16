@@ -92,16 +92,18 @@ local MERC_RECRUITABLE_OFFSETS = {
 local function setUnitRecruitable(unit, value)
   local euroOffset = EURO_RECRUITABLE_OFFSETS[unit]
   if euroOffset ~= nil then
-    local addr = MERC_RECRUITABLE_OFFSETS + euroOffset
+    local addr = memory.EURO_RECRUITABLE + euroOffset
     log(2, string.format("setUnitRecruitable: setting %s at %X to %s", unit,  addr, value))
     core.writeInteger(addr, value)
+    return
   end
 
   local mercOffset = MERC_RECRUITABLE_OFFSETS[unit]
   if mercOffset ~= nil then
-    local addr = MERC_RECRUITABLE_OFFSETS + mercOffset
+    local addr = memory.MERC_RECRUITABLE + mercOffset
     log(2, string.format("setUnitRecruitable: setting %s at %X to %s", unit,  addr, value))
     core.writeInteger(addr, value)
+    return
   end
 
   error( string.format("unknown unit: %s", unit))
