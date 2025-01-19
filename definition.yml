@@ -2,3 +2,5 @@ name: custom-skirmish-trails
 author: gynt
 type: module
 version: 1.0.0
+dependencies:
+  textResourceModifier: ">= 0.3.0" 

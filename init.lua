@@ -76,7 +76,7 @@ local function applyTrail(trailName, path, missions, limit)
   REGISTRY[trailName] = result
   
   for index, entry in pairs(REGISTRY[trailName]) do
-    interface.commitEntry(missions, index, entry)
+    interface.commitEntry(missions, index, entry, trailName)
   end
 end
 

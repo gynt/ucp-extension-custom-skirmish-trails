@@ -176,9 +176,25 @@ local ENTRY_OFFSETS = {
   ["aiv_type8"] = 35*4,
 }
 
-local function commitEntry(addr, index, entry)
+local function commitEntry(addr, index, entry, trail)
   local offset = addr + 144 * (index - 1)
   log(2, string.format("commitEntry: %s %X %s %X", entry, addr, index - 1, offset))
+
+  local missionName = entry.mission_name
+  if missionName ~=  nil then
+    if trail == "firstEditionTrail" then
+      -- first edition
+      modules.textResourceModifier:SetText(0xF5, 0x01 + (index - 1), missionName)      
+    elseif trail == "warchestTrail" then
+      -- warchest
+      modules.textResourceModifier:SetText(0xF5, 0x33 + (index - 1), missionName)
+    elseif trail == "extremeTrail" then
+      -- extreme
+      modules.textResourceModifier:SetText(0xF5, 0x51 + (index - 1), missionName)  
+    else 
+      error(string.format("unknown trail: %s", trail))
+    end  
+  end
   
   local mapName = entry.map_name --#:gsub("_", " ")
   if mapName ~= nil and STRING_ADDRESSES[mapName] == nil then

@@ -40,6 +40,7 @@ local HEADERS = {
 	}
 
 local HEADERS_EXTRA = {
+  "mission_name",
   "gold",
   "producible_bows",
   "producible_crossbows",
