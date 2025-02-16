@@ -1,5 +1,6 @@
 
 local memory = require("customskirmishtrails.memory")
+local description = require("customskirmishtrails.description")
 
 local WEAPON_PRODUCIBLE_OFFSETS = {
   address = memory.WEAPON_PRODUCIBLE,
@@ -259,9 +260,19 @@ local function commitEntryExtra(entry)
   end
 end
 
+local function commitTextDescription(entry)
+  log(2, string.format("commitTextDescription: %s => %s", entry, entry.text_description_line_01))
+  description.setText(1, entry.text_description_line_01 or "")
+  description.setText(2, entry.text_description_line_02 or "")
+  description.setText(3, entry.text_description_line_03 or "")
+  description.setText(4, entry.text_description_line_04 or "")
+  description.setText(5, entry.text_description_line_05 or "")
+end
+
 
 return {
   commitEntry = commitEntry,
   commitEntryExtra = commitEntryExtra,
+  commitTextDescription = commitTextDescription,
   STRING_ADDRESSES = STRING_ADDRESSES,
 }
