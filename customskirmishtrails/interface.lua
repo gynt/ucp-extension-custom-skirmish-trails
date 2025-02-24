@@ -71,10 +71,10 @@ end
 
 local EURO_RECRUITABLE_OFFSETS = {
   ["recruitable_archers"] = 0*4,
-  ["recruitable_spearmen"] = 1*4,
-  ["recruitable_macemen"] = 2*4,
-  ["recruitable_crossbowmen"] = 3*4,
-  ["recruitable_pikemen"] = 4*4,
+  ["recruitable_spearmen"] = 2*4,
+  ["recruitable_macemen"] = 1*4,
+  ["recruitable_crossbowmen"] = 4*4,
+  ["recruitable_pikemen"] = 3*4,
   ["recruitable_swordsmen"] = 5*4,
   ["recruitable_knights"] = 6*4,
 }
