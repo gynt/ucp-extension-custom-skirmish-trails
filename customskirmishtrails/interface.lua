@@ -1,6 +1,8 @@
 
 local memory = require("customskirmishtrails.memory")
 local description = require("customskirmishtrails.description")
+local common = require("customskirmishtrails.common")
+local tradeability = require("customskirmishtrails.interface_tradeability")
 
 local WEAPON_PRODUCIBLE_OFFSETS = {
   address = memory.WEAPON_PRODUCIBLE,
@@ -257,6 +259,14 @@ local function commitEntryExtra(entry)
 
   for name, offset in pairs(MERC_RECRUITABLE_OFFSETS) do
     setUnitRecruitable(name, entry[name])
+  end
+
+  for _, resource in ipairs(common.resources_array) do
+    local v = entry[string.format("trade_%s", resource)]
+    if v ~= nil then
+      log(2, string.format("tradeability: setting resource %s to %s", resource, v))
+      tradeability.setTradeable(resource, v)  
+    end
   end
 end
 

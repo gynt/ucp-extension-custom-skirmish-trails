@@ -3,6 +3,7 @@ local memory = require("customskirmishtrails.memory")
 local interface = require("customskirmishtrails.interface")
 local input = require("customskirmishtrails.input")
 local description = require("customskirmishtrails.description")
+local tradeability = require("customskirmishtrails.interface_tradeability")
 
 local TRAIL_TYPES = {
   [0] = "firstEditionTrail",
@@ -159,6 +160,7 @@ return {
     
     log(2, "enable description hijack")
     description.enable()
+    tradeability.enable()
     
     detourSwitchToMenu()
   end,
@@ -175,10 +177,14 @@ return {
   setText = function(self, line, text)
     description.setText(line, text)
   end,
+  setTradeable = function(self, resource, tradeable)
+    tradeability.setTradeable(resource, tradeable)
+  end,
 },
 {
   public = {
     "setTrailProgress",
     "setText",
+    "setTradeable",
   }
 }
