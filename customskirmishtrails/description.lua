@@ -13,6 +13,9 @@ local textLines = {
   core.allocate(1000, true),
   core.allocate(1000, true),
   core.allocate(1000, true),
+  core.allocate(1000, true),
+  core.allocate(1000, true),
+  core.allocate(1000, true),
 }
 
 local function genRenderText(address, xOffset, yOffset)
