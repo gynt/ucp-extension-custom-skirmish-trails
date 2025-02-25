@@ -4,6 +4,7 @@ local interface = require("customskirmishtrails.interface")
 local input = require("customskirmishtrails.input")
 local description = require("customskirmishtrails.description")
 local tradeability = require("customskirmishtrails.interface_tradeability")
+local producibility = require("customskirmishtrails.producibility")
 
 local TRAIL_TYPES = {
   [0] = "firstEditionTrail",
@@ -161,6 +162,7 @@ return {
     log(2, "enable description hijack")
     description.enable()
     tradeability.enable()
+    producibility.enable()
     
     detourSwitchToMenu()
   end,
@@ -180,11 +182,15 @@ return {
   setTradeable = function(self, resource, tradeable)
     tradeability.setTradeable(resource, tradeable)
   end,
+  setProducible = function(self, weapon, producible)
+    producibility.setWeaponProducible(weapon, producible)
+  end,
 },
 {
   public = {
     "setTrailProgress",
     "setText",
     "setTradeable",
+    "setProducible",
   }
 }

@@ -3,28 +3,9 @@ local memory = require("customskirmishtrails.memory")
 local description = require("customskirmishtrails.description")
 local common = require("customskirmishtrails.common")
 local tradeability = require("customskirmishtrails.interface_tradeability")
-
-local WEAPON_PRODUCIBLE_OFFSETS = {
-  address = memory.WEAPON_PRODUCIBLE,
-  offsets = {
-    ["producible_crossbows"] = 0,
-    ["producible_pikes"] = 4,
-    ["producible_swords"] = 8,
-    ["producible_bows"] = 12,
-    ["producible_spears"] = 14,
-    ["producible_maces"] = 16,
-  },
-  writeFunction = core.writeInteger,
-}
-
-local function setWeaponProducible(weapon, value)
-  local f = WEAPON_PRODUCIBLE_OFFSETS.writeFunction
-  local address = WEAPON_PRODUCIBLE_OFFSETS.address
-  local offsets = WEAPON_PRODUCIBLE_OFFSETS.offsets
-  local addr = address + offsets[weapon]
-  log(2, string.format("setWeaponProducible: %s @ %X: %s", weapon,addr, value))
-  f(addr, value)
-end
+local producibility = require("customskirmishtrails.producibility")
+local WEAPON_PRODUCIBLE_OFFSETS = producibility.WEAPON_PRODUCIBLE_OFFSETS
+local setWeaponProducible = producibility.setWeaponProducible
 
 -- 
 local function setStartGold(value)
@@ -243,7 +224,7 @@ local function commitEntryExtra(entry)
 
   for name, offset in pairs(WEAPON_PRODUCIBLE_OFFSETS.offsets) do
     if entry[name] ~= nil then
-      setWeaponProducible(name, entry[name])
+      setWeaponProducible(name, entry[string.format("producible_%s", name)])
     else
       log(2, string.format("commitEntryExtra: no weapon producible set: %s", name))
     end
