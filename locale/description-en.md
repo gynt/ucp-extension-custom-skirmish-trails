@@ -85,6 +85,8 @@ Here is a list:
 - resource_sword
 - resource_leatherarmor
 - resource_ironarmor
+- text_dexcription_line_01 - 08: Use "" to write text displayed in the skirmish misson start menu
+- trade_: Use e.g. trade_spear (single!) to set trading of that good off or on
 
 ## Support
 All support is welcome!
