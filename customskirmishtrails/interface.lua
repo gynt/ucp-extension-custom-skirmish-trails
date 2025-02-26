@@ -223,10 +223,11 @@ local function commitEntryExtra(entry)
   end
 
   for name, offset in pairs(WEAPON_PRODUCIBLE_OFFSETS.offsets) do
-    if entry[name] ~= nil then
-      setWeaponProducible(name, entry[string.format("producible_%s", name)])
+    local entry_name = string.format("producible_%s", name)
+    if entry[entry_name] ~= nil then
+      setWeaponProducible(name, entry[entry_name])
     else
-      log(2, string.format("commitEntryExtra: no weapon producible set: %s", name))
+      log(2, string.format("commitEntryExtra: no weapon producible set: %s", entry_name))
     end
   end
 
