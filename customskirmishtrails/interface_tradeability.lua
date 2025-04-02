@@ -11,6 +11,9 @@ return {
     if resources[goodsType] == nil then
       error(debug.traceback(string.format("No such goods type: %s", goodsType)))
     end
-    core.writeInteger(pTradeAbilityArray + (4 * resources[goodsType]), bool)
+    
+    local addr = pTradeAbilityArray + (4 * resources[goodsType])
+    log(2, string.format("setTradeable: %s => %s @ 0x%X", goodsType, bool, addr))
+    core.writeInteger(addr, bool)
   end,
 }
