@@ -3,6 +3,9 @@ This extension enables custom skirmish trails, specified in .csv files.
 
 ## Possibilities
 The zip file of this extension contains a template.csv file that describes what is possible to mod.
+
+An easy online editor can be found here: https://edit-csv.net/
+
 Here is a list:
 - map_name
 - fairness
