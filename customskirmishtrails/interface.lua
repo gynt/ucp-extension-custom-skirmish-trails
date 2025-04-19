@@ -4,8 +4,10 @@ local description = require("customskirmishtrails.description")
 local common = require("customskirmishtrails.common")
 local tradeability = require("customskirmishtrails.interface_tradeability")
 local producibility = require("customskirmishtrails.producibility")
+local recruitability = require("customskirmishtrails.recruitability")
 local WEAPON_PRODUCIBLE_OFFSETS = producibility.WEAPON_PRODUCIBLE_OFFSETS
 local setWeaponProducible = producibility.setWeaponProducible
+local setUnitRecruitable = recruitability.setUnitRecruitable
 
 -- 
 local function setStartGold(value)
@@ -52,46 +54,6 @@ local function setStartUnit(player, unit, count)
 
 end
 
-local EURO_RECRUITABLE_OFFSETS = {
-  ["recruitable_archers"] = 0*4,
-  ["recruitable_spearmen"] = 2*4,
-  ["recruitable_macemen"] = 1*4,
-  ["recruitable_crossbowmen"] = 4*4,
-  ["recruitable_pikemen"] = 3*4,
-  ["recruitable_swordsmen"] = 5*4,
-  ["recruitable_knights"] = 6*4,
-}
-
-local MERC_RECRUITABLE_OFFSETS = {
-  ["recruitable_arabian_bows"] = 0*4,
-  ["recruitable_slaves"] = 1*4,
-  ["recruitable_slingers"] = 2*4,
-  ["recruitable_assassins"] = 3*4,
-  ["recruitable_horse_archers"] = 4*4,
-  ["recruitable_arabian_swordsmen"] = 5*4,
-  ["recruitable_fire_throwers"] = 6*4,
-}
-
-
-local function setUnitRecruitable(unit, value)
-  local euroOffset = EURO_RECRUITABLE_OFFSETS[unit]
-  if euroOffset ~= nil then
-    local addr = memory.EURO_RECRUITABLE + euroOffset
-    log(2, string.format("setUnitRecruitable: setting %s at %X to %s", unit,  addr, value))
-    core.writeInteger(addr, value)
-    return
-  end
-
-  local mercOffset = MERC_RECRUITABLE_OFFSETS[unit]
-  if mercOffset ~= nil then
-    local addr = memory.MERC_RECRUITABLE + mercOffset
-    log(2, string.format("setUnitRecruitable: setting %s at %X to %s", unit,  addr, value))
-    core.writeInteger(addr, value)
-    return
-  end
-
-  error( string.format("unknown unit: %s", unit))
-end
 
 local PLAYER_MAPPING = {
   ["SK_RAT"] = 1,
@@ -235,12 +197,12 @@ local function commitEntryExtra(entry)
     setStartGold(entry.gold)
   end
   
-  for name, offset in pairs(EURO_RECRUITABLE_OFFSETS) do
-    setUnitRecruitable(name, entry[name])
+  for name, offset in pairs(recruitability.EURO_RECRUITABLE_OFFSETS) do
+    setUnitRecruitable(name, entry["recruitable_" .. name])
   end
 
-  for name, offset in pairs(MERC_RECRUITABLE_OFFSETS) do
-    setUnitRecruitable(name, entry[name])
+  for name, offset in pairs(recruitability.MERC_RECRUITABLE_OFFSETS) do
+    setUnitRecruitable(name, entry["recruitable_" .. name])
   end
 
   for _, resource in ipairs(common.resources_array) do

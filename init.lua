@@ -5,6 +5,7 @@ local input = require("customskirmishtrails.input")
 local description = require("customskirmishtrails.description")
 local tradeability = require("customskirmishtrails.interface_tradeability")
 local producibility = require("customskirmishtrails.producibility")
+local recruitability = require("customskirmishtrails.recruitability")
 
 local TRAIL_TYPES = {
   [0] = "firstEditionTrail",
@@ -179,11 +180,20 @@ return {
   setText = function(self, line, text)
     description.setText(line, text)
   end,
+  getTradeable = function(self, resource)
+    return tradeability.getTradeable(resource)
+  end,
   setTradeable = function(self, resource, tradeable)
     tradeability.setTradeable(resource, tradeable)
   end,
   setProducible = function(self, weapon, producible)
     producibility.setWeaponProducible(weapon, producible)
+  end,
+  getRecruitable = function(self, unit)
+    return recruitability.getUnitRecruitable(unit)
+  end,
+  setRecruitable = function(self, unit, value)
+    recruitability.setUnitRecruitable(unit, value)
   end,
 },
 {

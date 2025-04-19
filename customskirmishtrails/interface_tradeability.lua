@@ -16,4 +16,14 @@ return {
     log(2, string.format("setTradeable: %s => %s @ 0x%X", goodsType, bool, addr))
     core.writeInteger(addr, bool)
   end,
+
+  getTradeable = function(goodsType)
+    if resources[goodsType] == nil then
+      error(debug.traceback(string.format("No such goods type: %s", goodsType)))
+    end
+    
+    local addr = pTradeAbilityArray + (4 * resources[goodsType])
+    log(2, string.format("getTradeable: %s @ 0x%X", goodsType, addr))
+    return core.readInteger(addr)
+  end,
 }

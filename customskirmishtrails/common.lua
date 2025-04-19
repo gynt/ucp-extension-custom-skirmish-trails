@@ -1,3 +1,4 @@
+---TODO:fixme: improve this duplication nonesense
 local RESOURCES = {
   logs=1,
   wood=2,
