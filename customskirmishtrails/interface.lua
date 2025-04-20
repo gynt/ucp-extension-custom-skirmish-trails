@@ -1,59 +1,16 @@
 
 local memory = require("customskirmishtrails.memory")
-local description = require("customskirmishtrails.description")
-local common = require("customskirmishtrails.common")
 local tradeability = require("customskirmishtrails.interface_tradeability")
 local producibility = require("customskirmishtrails.producibility")
 local recruitability = require("customskirmishtrails.recruitability")
-local WEAPON_PRODUCIBLE_OFFSETS = producibility.WEAPON_PRODUCIBLE_OFFSETS
-local setWeaponProducible = producibility.setWeaponProducible
-local setUnitRecruitable = recruitability.setUnitRecruitable
+local descriptiveTexts = require("customskirmishtrails.descriptive_texts")
+local startgoods = require("customskirmishtrails.start_goods")
 
 -- 
 local function setStartGold(value)
   log(2, string.format("setStartGold: %s @ %X: %s", "gold",memory.START_GOLD, value))
   core.writeInteger(memory.START_GOLD, value) -- check intesnity value validity
 end
-
-local RESOURCE_TYPES = {
-	["resource_wood"] =         2,
-	["resource_hops"] =         3,
-	["resource_stone"] =        4,
-	["resource_partialstone"] = 5,
-	["resource_iron"] =         6,
-	["resource_pitch"] =        7,
-	["resource_partialpitch"] = 8,
-	["resource_wheat"] =        9,
-	["resource_bread"] =        10,
-	["resource_cheese"] =       11,
-	["resource_meat"] =         12,
-	["resource_apple"] =        13,
-	["resource_ale"] =          14,
-	["resource_gold"] =         15,
-  ["resource_flour"] =        16,
-	["resource_bow"] =          17,
-	["resource_crossbow"] =     18,
-	["resource_spear"] =        19,
-	["resource_pike"] =         20,
-	["resource_mace"] =         21,
-	["resource_sword"] =        22,
-	["resource_leatherarmor"] = 23,
-	["resource_ironarmor"] =    24,
-}
-
-local function setStartGood(good, value)
-  local g = RESOURCE_TYPES[good]
-  if g == nil then error(string.format("unknown good type: %s", good)) end
-
-  local addr = memory.START_GOODS + (4*g)
-  log(2, string.format("setStartGood: %s @ %X: %s", good,addr, value))
-  core.writeInteger(addr, value)
-end
-
-local function setStartUnit(player, unit, count)
-
-end
-
 
 local PLAYER_MAPPING = {
   ["SK_RAT"] = 1,
@@ -178,52 +135,22 @@ end
 local function commitEntryExtra(entry)
   log(2, string.format("commitEntryExtra: %s", entry))
 
-  for name, offset in pairs(RESOURCE_TYPES) do
-    if entry[name] ~= nil then
-      setStartGood(name, entry[name])
-    end
-  end
+  startgoods.setStartGoods(entry)
 
-  for name, offset in pairs(WEAPON_PRODUCIBLE_OFFSETS.offsets) do
-    local entry_name = string.format("producible_%s", name)
-    if entry[entry_name] ~= nil then
-      setWeaponProducible(name, entry[entry_name])
-    else
-      log(2, string.format("commitEntryExtra: no weapon producible set: %s", entry_name))
-    end
-  end
+  producibility.setWeaponsProducible(entry)
 
   if entry.gold ~= nil then
     setStartGold(entry.gold)
   end
   
-  for name, offset in pairs(recruitability.EURO_RECRUITABLE_OFFSETS) do
-    setUnitRecruitable(name, entry["recruitable_" .. name])
-  end
+  recruitability.setUnitsRecruitable(entry)
 
-  for name, offset in pairs(recruitability.MERC_RECRUITABLE_OFFSETS) do
-    setUnitRecruitable(name, entry["recruitable_" .. name])
-  end
-
-  for _, resource in ipairs(common.resources_array) do
-    local v = entry[string.format("trade_%s", resource)]
-    if v ~= nil then
-      log(2, string.format("tradeability: setting resource %s to %s", resource, v))
-      tradeability.setTradeable(resource, v)  
-    end
-  end
+  tradeability.setTradeables(entry)
 end
 
 local function commitTextDescription(entry)
   log(2, string.format("commitTextDescription: %s => %s", entry, entry.text_description_line_01))
-  description.setText(1, entry.text_description_line_01 or "")
-  description.setText(2, entry.text_description_line_02 or "")
-  description.setText(3, entry.text_description_line_03 or "")
-  description.setText(4, entry.text_description_line_04 or "")
-  description.setText(5, entry.text_description_line_05 or "")
-  description.setText(6, entry.text_description_line_06 or "")
-  description.setText(7, entry.text_description_line_07 or "")
-  description.setText(8, entry.text_description_line_08 or "")
+  descriptiveTexts.setTextDescriptions(entry)
 end
 
 

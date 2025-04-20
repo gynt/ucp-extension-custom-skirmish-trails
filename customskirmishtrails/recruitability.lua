@@ -59,9 +59,20 @@ local function setUnitRecruitable(unit, value)
   error( string.format("unknown unit: %s", unit))
 end
 
+local function setUnitsRecruitable(entry)
+  for name, offset in pairs(EURO_RECRUITABLE_OFFSETS) do
+    setUnitRecruitable(name, entry["recruitable_" .. name])
+  end
+
+  for name, offset in pairs(MERC_RECRUITABLE_OFFSETS) do
+    setUnitRecruitable(name, entry["recruitable_" .. name])
+  end
+end
+
 return {
   setUnitRecruitable = setUnitRecruitable,
   getUnitRecruitable = getUnitRecruitable,
+  setUnitsRecruitable = setUnitsRecruitable,
   EURO_RECRUITABLE_OFFSETS = EURO_RECRUITABLE_OFFSETS,
   MERC_RECRUITABLE_OFFSETS = MERC_RECRUITABLE_OFFSETS,
 }

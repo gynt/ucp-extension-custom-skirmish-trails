@@ -27,6 +27,17 @@ local function setWeaponProducible(weapon, value)
   f(addr, value)
 end
 
+local function setWeaponsProducible(entry)
+  for name, offset in pairs(WEAPON_PRODUCIBLE_OFFSETS.offsets) do
+    local entry_name = string.format("producible_%s", name)
+    if entry[entry_name] ~= nil then
+      setWeaponProducible(name, entry[entry_name])
+    else
+      log(2, string.format("commitEntryExtra: no weapon producible set: %s", entry_name))
+    end
+  end
+end
+
 local function getWeaponProducible(weapon, value)
   local f = WEAPON_PRODUCIBLE_OFFSETS.readFunction
   local address = WEAPON_PRODUCIBLE_OFFSETS.address
@@ -81,5 +92,6 @@ return {
     end, pPoleTurnerDetour, poleturnerDetourSize)
   end,
   setWeaponProducible = setWeaponProducible,
+  setWeaponsProducible = setWeaponsProducible,
   WEAPON_PRODUCIBLE_OFFSETS = WEAPON_PRODUCIBLE_OFFSETS,
 }
