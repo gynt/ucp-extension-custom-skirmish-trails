@@ -1,9 +1,11 @@
+---@diagnostic disable-next-line: undefined-global
+local yaml = yaml or {dump = function(...) error("missing function") end}
 
 local memory = require("customskirmishtrails.memory")
 local interface = require("customskirmishtrails.interface")
-local input = require("customskirmishtrails.input")
+local cst_io = require("customskirmishtrails.io")
 local description = require("customskirmishtrails.description")
-local tradeability = require("customskirmishtrails.interface_tradeability")
+local tradeability = require("customskirmishtrails.tradeability")
 local producibility = require("customskirmishtrails.producibility")
 local recruitability = require("customskirmishtrails.recruitability")
 
@@ -47,7 +49,8 @@ end
 
 local function insertPostSkirmishSetupDetour()
   log(2, "insertPostSkirmishSetupDetour: setting up detour")
-  local detourLocation, detourSize = core.AOBScan("A1 ? ? ? ? 8D 0C 80 03 C9 89 ? ? ? ? ?"), 5
+  -- local detourLocation, detourSize = core.AOBScan("A1 ? ? ? ? 8D 0C 80 03 C9 89 ? ? ? ? ?"), 5
+  local detourLocation, detourSize = core.AOBScan("8B 8C 24 ? ? 00 00 5f 5e 89 ? ? ? ? ? 89 ? ? ? ? ? 89 ? ? ? ? ? 89 ? ? ? ? ? 5B 33 CC"), 7
   core.detourCode(function(registers)
     if core.readInteger(memory.IS_SKIRMISH_TRAIL) ~= 1 then
       log(2, "not in skirmish trail")
@@ -83,7 +86,7 @@ local function insertPostSkirmishSetupDetour()
 end
 
 local function applyTrail(trailName, path, missions, limit)
-  local result, err = input.readCSV(path, limit)
+  local result, err = cst_io.readCSV(path, limit)
   if result == nil then error(err) end
   
   local f = io.open(string.format("ucp/.cache/custom-skirmish-trails-config-%s.yml", trailName), 'w')

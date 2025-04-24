@@ -21,7 +21,7 @@ end
 
 function tradeability.setTradeables(entry)
   for _, resource in ipairs(common.resources_array) do
-    local v = entry[string.format("trade_%s", resource)]
+    local v = entry[string.format("tradeable_%s", resource)]
     if v ~= nil then
       log(2, string.format("tradeability: setting resource %s to %s", resource, v))
       tradeability.setTradeable(resource, v)  

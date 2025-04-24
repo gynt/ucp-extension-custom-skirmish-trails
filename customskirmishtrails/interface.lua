@@ -1,6 +1,6 @@
 
 local memory = require("customskirmishtrails.memory")
-local tradeability = require("customskirmishtrails.interface_tradeability")
+local tradeability = require("customskirmishtrails.tradeability")
 local producibility = require("customskirmishtrails.producibility")
 local recruitability = require("customskirmishtrails.recruitability")
 local descriptiveTexts = require("customskirmishtrails.descriptive_texts")

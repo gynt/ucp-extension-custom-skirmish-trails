@@ -1,3 +1,4 @@
+---@diagnostic disable-next-line: undefined-global
 local ucp = ucp or {internal = {
   resolveAliasedPath = function(...) error("resolveAliasedPath not found, ucp lib not found") end,
 }}
@@ -125,14 +126,14 @@ local HEADERS_TYPES = {
   ["fairness"] = "integer",
 	["start_levels"] = "integer",
 	["num_players"] = "integer",
-	["player1"] = "integer",
-	["player2"] = "integer",
-	["player3"] = "integer",
-	["player4"] = "integer",
-	["player5"] = "integer",
-	["player6"] = "integer",
-	["player7"] = "integer",
-	["player8"] = "integer",
+	["player1"] = "string",
+	["player2"] = "string",
+	["player3"] = "string",
+	["player4"] = "string",
+	["player5"] = "string",
+	["player6"] = "string",
+	["player7"] = "string",
+	["player8"] = "string",
 	["start_position1"] = "integer",
 	["start_position2"] = "integer",
 	["start_position3"] = "integer",
@@ -252,11 +253,19 @@ local function getContents(path)
   return contents
 end
 
-local function validateInput(input)
+local function fail(name, expected, received, value)
+  error(string.format("header %s: expected a '%s' but received a '%s': %s", name, expected, received, value))
+end
 
-  local function fail(name, expected, received, value)
-    error(string.format("header %s: expected a '%s' but received a '%s': %s", name, expected, received, value))
+local function numberify(name, expected, received, value)
+  local nvalue = tonumber(value)
+  if nvalue == nil then
+    fail(name, expected, received, value)
   end
+  return nvalue
+end
+
+local function validateInput(input)
 
   for name, value in pairs(input) do
     local t = HEADERS_TYPES[name]
@@ -264,13 +273,21 @@ local function validateInput(input)
     local ty = type(value)
     if ty == "string" then
       -- always fine?
-      if t ~= "string" then
+      if t == "binary" then
+        local nvalue = numberify(name, t, ty, value)
+        input[name] = nvalue
+        if nvalue ~= 1 and nvalue ~= 0 then
+          fail(name, t, ty, value)
+        end
+      elseif t == "number" or t == "integer" then
+        input[name] = numberify(name, t, ty, value)
+      elseif t ~= "string" then
         fail(name, t, ty, value)
       end
     elseif ty == "number" then
       if t == "integer" then
         local iv = tonumber(string.format("%i", value), 10)
-        if iv ~= value then
+        if iv == nil or iv ~= value then
           fail(name, t, ty, value)
         end
       elseif t == "binary" then
