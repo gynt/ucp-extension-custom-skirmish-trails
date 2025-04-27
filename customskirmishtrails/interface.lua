@@ -5,6 +5,7 @@ local producibility = require("customskirmishtrails.producibility")
 local recruitability = require("customskirmishtrails.recruitability")
 local descriptiveTexts = require("customskirmishtrails.descriptive_texts")
 local startgoods = require("customskirmishtrails.start_goods")
+local startgold = require("customskirmishtrails.startgold")
 
 -- 
 local function setStartGold(value)
@@ -138,10 +139,6 @@ local function commitEntryExtra(entry)
   startgoods.setStartGoods(entry)
 
   producibility.setWeaponsProducible(entry)
-
-  if entry.gold ~= nil then
-    setStartGold(entry.gold)
-  end
   
   recruitability.setUnitsRecruitable(entry)
 
@@ -149,14 +146,19 @@ local function commitEntryExtra(entry)
 end
 
 local function commitTextDescription(entry)
-  log(2, string.format("commitTextDescription: %s => %s", entry, entry.text_description_line_01))
+  log(VERBOSE, string.format("commitTextDescription: %s => %s", entry, entry.text_description_line_01))
   descriptiveTexts.setTextDescriptions(entry)
 end
 
+local function commitStartGoldDisplay(entry)
+  log(VERBOSE, string.format("commitStartGoldDisplay: %s => %s", entry, entry.gold_player_2))
+  startgold.setStartGoldDisplay(entry)
+end
 
 return {
   commitEntry = commitEntry,
   commitEntryExtra = commitEntryExtra,
   commitTextDescription = commitTextDescription,
+  commitStartGoldDisplay = commitStartGoldDisplay,
   STRING_ADDRESSES = STRING_ADDRESSES,
 }

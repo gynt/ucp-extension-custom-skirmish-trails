@@ -89,28 +89,28 @@ local HEADERS_EXTRA = {
   "resource_sword",
   "resource_leatherarmor",
   "resource_ironarmor",
-  "trade_wood",
-  "trade_hops",
-  "trade_stone",
-  "trade_iron",
-  "trade_pitch",
-  "trade_wheat",
-  "trade_bread",
-  "trade_cheese",
-  "trade_meat",
-  "trade_apple",
-  "trade_ale",
-  "trade_beer",
-  "trade_gold",
-  "trade_flour",
-  "trade_bow",
-  "trade_crossbow",
-  "trade_spear",
-  "trade_pike",
-  "trade_mace",
-  "trade_sword",
-  "trade_leatherarmor",
-  "trade_ironarmor",
+  "tradeable_wood",
+  "tradeable_hops",
+  "tradeable_stone",
+  "tradeable_iron",
+  "tradeable_pitch",
+  "tradeable_wheat",
+  "tradeable_bread",
+  "tradeable_cheese",
+  "tradeable_meat",
+  "tradeable_apple",
+  "tradeable_ale",
+  "tradeable_beer",
+  "tradeable_gold",
+  "tradeable_flour",
+  "tradeable_bow",
+  "tradeable_crossbow",
+  "tradeable_spear",
+  "tradeable_pike",
+  "tradeable_mace",
+  "tradeable_sword",
+  "tradeable_leatherarmor",
+  "tradeable_ironarmor",
   "text_description_line_01",
   "text_description_line_02",
   "text_description_line_03",
@@ -119,6 +119,14 @@ local HEADERS_EXTRA = {
   "text_description_line_06",
   "text_description_line_07",
   "text_description_line_08",
+  "gold_player_1",
+  "gold_player_2",
+  "gold_player_3",
+  "gold_player_4",
+  "gold_player_5",
+  "gold_player_6",
+  "gold_player_7",
+  "gold_player_8",
 }
 
 local HEADERS_TYPES = {
@@ -233,6 +241,25 @@ local HEADERS_TYPES = {
   ["text_description_line_06"] = "string",
   ["text_description_line_07"] = "string",
   ["text_description_line_08"] = "string",
+  ["gold_player_1"] = "integer",
+  ["gold_player_2"] = "integer",
+  ["gold_player_3"] = "integer",
+  ["gold_player_4"] = "integer",
+  ["gold_player_5"] = "integer",
+  ["gold_player_6"] = "integer",
+  ["gold_player_7"] = "integer",
+  ["gold_player_8"] = "integer",
+}
+
+local ALLOW_NIL = {
+  ["gold_player_1"] = true,
+  ["gold_player_2"] = true,
+  ["gold_player_3"] = true,
+  ["gold_player_4"] = true,
+  ["gold_player_5"] = true,
+  ["gold_player_6"] = true,
+  ["gold_player_7"] = true,
+  ["gold_player_8"] = true,
 }
 
 local function prefixHeaders(contents)
@@ -259,7 +286,7 @@ end
 
 local function numberify(name, expected, received, value)
   local nvalue = tonumber(value)
-  if nvalue == nil then
+  if nvalue == nil and ALLOW_NIL[name] == false then
     fail(name, expected, received, value)
   end
   return nvalue

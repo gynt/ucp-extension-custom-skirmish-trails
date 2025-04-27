@@ -8,44 +8,12 @@ local description = require("customskirmishtrails.description")
 local tradeability = require("customskirmishtrails.tradeability")
 local producibility = require("customskirmishtrails.producibility")
 local recruitability = require("customskirmishtrails.recruitability")
+local startgold = require("customskirmishtrails.startgold")
 
-local TRAIL_TYPES = {
-  [0] = "firstEditionTrail",
-  [1] = "warchestTrail",
-  [2] = "extremeTrail",
-}
-
----@type table<string, table<number, table>>
-local REGISTRY = {
-  ["firstEditionTrail"] = nil,
-  ["warchestTrail"] = nil,
-  ["extremeTrail"] = nil,
-}
-
-local TRAIL_PROGRESS_ADDRESSES = {
-  ["firstEditionTrail"] = memory.FIRST_EDITION_TRAIL_PROGRESS,
-  ["warchestTrail"] = memory.WARCHEST_TRAIL_PROGRESS,
-  ["extremeTrail"] = memory.EXTREME_TRAIL_PROGRESS,
-}
-
-
-local function removeExtremeMultiplier()
-  local visualAddr= core.AOBScan("8D 77 01 8B ? ? ? ? ? A1 ? ? ? ?")
-  -- core.writeCode(visualAddr, {0x90, 0x90, 0x90, })
-end
-
-local function fetchCurrentTrail()
-    local trail =  core.readInteger(memory.CURRENT_TRAIL_TYPE) 
-    local trailName = TRAIL_TYPES[trail]
-
-    if trailName == nil then error(string.format("invalid trail: %s", trail)) end
-
-    local progressAddr = TRAIL_PROGRESS_ADDRESSES[trailName]
-
-    local mission = core.readInteger(progressAddr) + 1
-    
-    return trail, trailName, mission
-end
+local TRAIL_TYPES = memory.TRAIL_TYPES
+local TRAIL_PROGRESS_ADDRESSES = memory.TRAIL_PROGRESS_ADDRESSES
+local REGISTRY = memory.REGISTRY
+local fetchCurrentTrail = memory.fetchCurrentTrail
 
 local function insertPostSkirmishSetupDetour()
   log(2, "insertPostSkirmishSetupDetour: setting up detour")
@@ -107,7 +75,7 @@ local function detourSwitchToMenu()
     if trail ~= nil then
       local missions = REGISTRY[trailName]
       if missions == nil then
-        log(2, string.format("No custom missions registered for trail name: %s", trailName))
+        log(VERBOSE, string.format("No custom missions registered for trail name: %s", trailName))
         return registers
       end
 
@@ -115,6 +83,7 @@ local function detourSwitchToMenu()
       if entry == nil then log(-1, string.format("skirmish trail (%s) entry is unexpectedly nil: %s", trailName, mission)) end
       
       interface.commitTextDescription(entry)
+      interface.commitStartGoldDisplay(entry)
       
     else
       log(2, "detourSwitchMenu: no text description to set")
@@ -148,25 +117,26 @@ return {
     insertPostSkirmishSetupDetour()
 
 
-    -- detour to get the map text displayed right...
-    core.detourCode(function(registers)
-      if core.readInteger(memory.IS_SKIRMISH_TRAIL) ~= 1 then
-        return registers
-      end
+    -- -- detour to get the map text displayed right...
+    -- core.detourCode(function(registers)
+    --   if core.readInteger(memory.IS_SKIRMISH_TRAIL) ~= 1 then
+    --     return registers
+    --   end
 
-      if core.readInteger(memory.CURRENT_TRAIL_TYPE) ~= 2 then
-        return registers
-      end
+    --   if core.readInteger(memory.CURRENT_TRAIL_TYPE) ~= 2 then
+    --     return registers
+    --   end
 
-      local mission = core.readInteger(memory.EXTREME_TRAIL_PROGRESS) + 1
-      local entry = REGISTRY.extremeTrail[mission]
-      -- todo
-    end, core.AOBScan("83 C2 51 52", 9))
+    --   local mission = core.readInteger(memory.EXTREME_TRAIL_PROGRESS) + 1
+    --   local entry = REGISTRY.extremeTrail[mission]
+    --   -- todo
+    -- end, core.AOBScan("83 C2 51 52", 9))
     
     log(2, "enable description hijack")
     description.enable()
     tradeability.enable()
     producibility.enable()
+    startgold.enable()
     
     detourSwitchToMenu()
   end,

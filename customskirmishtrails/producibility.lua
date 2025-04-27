@@ -33,7 +33,7 @@ local function setWeaponsProducible(entry)
     if entry[entry_name] ~= nil then
       setWeaponProducible(name, entry[entry_name])
     else
-      log(2, string.format("commitEntryExtra: no weapon producible set: %s", entry_name))
+      log(2, string.format("setWeaponsProducible: no weapon producible set: %s", entry_name))
     end
   end
 end

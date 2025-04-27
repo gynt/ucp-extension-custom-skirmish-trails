@@ -18,6 +18,39 @@ local _, extremeTrailProgressAddr = utils.AOBExtract("89 ? I(? ? ? ?) E8 ? ? ? ?
 local _, warchestTrailProgressAddr = utils.AOBExtract("89 ? I(? ? ? ?) E8 ? ? ? ? 8B ? ? ? ? ? 8B ? ? ? ? ? ? 89 ? ? ? ? ?")
 local _, firstEditionTrailProgressAddr = utils.AOBExtract("8B ? I(? ? ? ?) 8B ? ? ? ? ? ? 89 ? ? ? ? ? 8B C1")
 
+
+local TRAIL_TYPES = {
+  [0] = "firstEditionTrail",
+  [1] = "warchestTrail",
+  [2] = "extremeTrail",
+}
+
+---@type table<string, table<number, table>>
+local REGISTRY = {
+  ["firstEditionTrail"] = nil,
+  ["warchestTrail"] = nil,
+  ["extremeTrail"] = nil,
+}
+
+local TRAIL_PROGRESS_ADDRESSES = {
+  ["firstEditionTrail"] = firstEditionTrailProgressAddr,
+  ["warchestTrail"] = warchestTrailProgressAddr,
+  ["extremeTrail"] = extremeTrailProgressAddr,
+}
+
+local function fetchCurrentTrail()
+    local trail =  core.readInteger(currentTrailTypeAddr) 
+    local trailName = TRAIL_TYPES[trail]
+
+    if trailName == nil then error(string.format("invalid trail: %s", trail)) end
+
+    local progressAddr = TRAIL_PROGRESS_ADDRESSES[trailName]
+
+    local mission = core.readInteger(progressAddr) + 1
+    
+    return trail, trailName, mission
+end
+
 return {
   STARTING_TROOPS = startingTroopsAddr,
   EURO_RECRUITABLE = euroRecruitableAddr,
@@ -30,4 +63,8 @@ return {
   EXTREME_TRAIL_PROGRESS = extremeTrailProgressAddr,
   WARCHEST_TRAIL_PROGRESS = warchestTrailProgressAddr,
   FIRST_EDITION_TRAIL_PROGRESS = firstEditionTrailProgressAddr,
+  fetchCurrentTrail = fetchCurrentTrail,
+  TRAIL_PROGRESS_ADDRESSES = TRAIL_PROGRESS_ADDRESSES,
+  TRAIL_TYPES = TRAIL_TYPES,
+  REGISTRY = REGISTRY,
 }
