@@ -70,10 +70,16 @@ function startgold.enable()
       
       local playerID = registers.EBX
 
-      local value = tonumber(entry[string.format("gold_player_%i", playerID)]) or nil
-      if value == nil then
+      local humanGold = core.readInteger(pStartGoldValues + (4 * 0))
+      local computerGold = core.readInteger(pStartGoldValues + (4 * 1))
+      local value = 0
+      if playerID == 0 then
         log(VERBOSE, string.format("no gold value specified for player: %i", playerID))
         return registers
+      elseif playerID == 1 then
+        value = humanGold
+      else
+        value = computerGold
       end
       
       log(VERBOSE, string.format("gold value set for player '%i' to: %i", playerID, value))
