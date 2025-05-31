@@ -151,8 +151,12 @@ return {
     core.insertCode(core.AOBScan("8D A4 24 00 00 00 00 83 FD 01"), 7, codes, nil, 'after')
   end,
   setText = function(line, text)
-    core.writeString(textLines[line], text)
-    core.writeByte(textLines[line] + string.len(text), 0)
+    local ttext = modules.textResourceModifier:TransformText(text)
+    core.writeString(textLines[line], ttext)
+    core.writeByte(textLines[line] + string.len(ttext), 0)
+  end,
+  getText = function(line)
+    return core.readString(textLines[line])
   end,
 }
 

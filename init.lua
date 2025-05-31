@@ -168,6 +168,12 @@ return {
   setRecruitable = function(self, unit, value)
     recruitability.setUnitRecruitable(unit, value)
   end,
+  getTextDescription = function(self, index)
+    return description.getText(index)
+  end,
+  setTextDescription = function(self, index, value)
+    return description.setText(index, value)
+  end,
 },
 {
   public = {
