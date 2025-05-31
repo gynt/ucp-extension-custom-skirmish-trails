@@ -130,15 +130,20 @@ function startgold.setStartGoldDisplay(entry)
   core.writeInteger(pCurrentTrail, trail)
   core.writeInteger(pCurrentMission, mission - 1)
 
-  local highest = 0
+  local computers = nil
   for playerID=2,8 do
-    local value = tonumber(entry[string.format("gold_player_%i", playerID)]) or 0
-    if value > highest then highest = value end
+    local value = tonumber(entry[string.format("gold_player_%i", playerID)])
+    if value ~= nil then
+      if computers == nil then computers = 0 end
+      if value > computers then computers = value end
+    end
   end
-  local player = tonumber(entry["gold_player_1"]) or 0
-  log(VERBOSE, string.format("setStartGoldDisplay: %s %s", player, highest))
-  core.writeInteger(pStartGoldValues + (4 * 0), player)
-  core.writeInteger(pStartGoldValues + (4 * 1), highest)
+  local humans = tonumber(entry["gold_player_1"]) or 0
+  log(VERBOSE, string.format("setStartGoldDisplay: humans: %s computers: %s", humans, computers))
+  core.writeInteger(pStartGoldValues + (4 * 0), humans)
+  if computers ~= nil then
+    core.writeInteger(pStartGoldValues + (4 * 1), computers)
+  end
 end
 
 return startgold
