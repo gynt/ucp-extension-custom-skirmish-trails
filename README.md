@@ -24,5 +24,5 @@ Do you like what you are seeing? Consider donating to support my work.
 Sometimes I get bad reviews of course. Some people don't like it.  Here is a short hall of fame.
 
 #### "A half-baked and inconsequential plugin"
-Reviewer: Krarilotus
+Reviewer: Krarilotus  
 Module version: 1.2.1
