@@ -16,3 +16,13 @@ This tool is recommended to manipulate the csv files https://edit-csv.net/
 ## Planned features
 1. Create template csv for the First trail
 2. Create template csv for the Warchest trail
+
+## Support
+Do you like what you are seeing? Consider donating to support my work.
+
+### Bad Review Hall Of Fame
+Sometimes I get bad reviews fo course. Some people don't like it.  Here is a short hall of fame.
+
+#### "A half-baked and inconsequential plugin"
+Reviewer: Krarilotus
+Module version: 1.2.1
