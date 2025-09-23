@@ -54,7 +54,7 @@ local function insertPostSkirmishSetupDetour()
 end
 
 local function applyTrail(trailName, path, missions, limit)
-  local result, err = cst_io.readCSV(path, limit)
+  local result, err = cst_io.readCSV(path, limit + 1) -- one for the header
   if result == nil then error(err) end
   
   local f = io.open(string.format("ucp/.cache/custom-skirmish-trails-config-%s.yml", trailName), 'w')
