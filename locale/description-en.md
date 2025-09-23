@@ -4,6 +4,8 @@ This extension enables custom skirmish trails, specified in .csv files.
 ## Possibilities
 The zip file of this extension contains a template.csv file that describes what is possible to mod.
 
+You can also download the first trail [here](https://raw.githubusercontent.com/gynt/ucp-extension-custom-skirmish-trails/refs/heads/main/template-First-Edition-Trail.csv), the warchest [here](https://raw.githubusercontent.com/gynt/ucp-extension-custom-skirmish-trails/refs/heads/main/template-Warchest-Trail.csv) and the extreme trail [here](https://raw.githubusercontent.com/gynt/ucp-extension-custom-skirmish-trails/refs/heads/main/template-Extreme-Trail.csv).
+
 An easy online editor can be found here: https://edit-csv.net/
 
 Here is a list:
@@ -68,10 +70,8 @@ Here is a list:
 - resource_wood
 - resource_hops
 - resource_stone
-- resource_partialstone
 - resource_iron
 - resource_pitch
-- resource_partialpitch
 - resource_wheat
 - resource_bread
 - resource_cheese
