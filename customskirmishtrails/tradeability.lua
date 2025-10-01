@@ -9,14 +9,19 @@ function tradeability.enable()
   _, pTradeAbilityArray = utils.AOBExtract("89 ? I(? ? ? ?) 83 C0 08 83 C1 04 83 C6 04")
 end
 
+---@param goodsType string
+---@param bool boolean
 function tradeability.setTradeable(goodsType, bool)
   if resources[goodsType] == nil then
     error(debug.traceback(string.format("No such goods type: %s", goodsType)))
   end
+
+  local int = 0
+  if bool then int = 1 end
   
   local addr = pTradeAbilityArray + (4 * resources[goodsType])
-  log(2, string.format("setTradeable: %s => %s @ 0x%X", goodsType, bool, addr))
-  core.writeInteger(addr, bool)
+  log(2, string.format("setTradeable: %s => %s (%s) @ 0x%X", goodsType, bool, int, addr))
+  core.writeInteger(addr, int)
 end
 
 function tradeability.setTradeables(entry)

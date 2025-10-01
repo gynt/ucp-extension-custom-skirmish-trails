@@ -9,6 +9,7 @@ local tradeability = require("customskirmishtrails.tradeability")
 local producibility = require("customskirmishtrails.producibility")
 local recruitability = require("customskirmishtrails.recruitability")
 local startgold = require("customskirmishtrails.startgold")
+local start_goods = require("customskirmishtrails.start_goods")
 
 local TRAIL_TYPES = memory.TRAIL_TYPES
 local TRAIL_PROGRESS_ADDRESSES = memory.TRAIL_PROGRESS_ADDRESSES
@@ -141,6 +142,15 @@ return {
     detourSwitchToMenu()
   end,
   disable = function(self, config) end,
+  getTrailProgress = function(self, trail)
+    local progressAddr = TRAIL_PROGRESS_ADDRESSES[trail]
+
+    if progressAddr == nil then
+      error(string.format("no such trail: %s", trail))
+    end
+    
+    return core.readInteger(progressAddr)
+  end,
   setTrailProgress = function(self, trail, progress)
     local progressAddr = TRAIL_PROGRESS_ADDRESSES[trail]
 
@@ -152,6 +162,12 @@ return {
   end,
   setText = function(self, line, text)
     description.setText(line, text)
+  end,
+  getStartGood = function(self, good)
+    return start_goods.getStartGood(good)
+  end,
+  setStartGood = function(self, good, value)
+    start_goods.setStartGood(good, value)
   end,
   getTradeable = function(self, resource)
     return tradeability.getTradeable(resource)

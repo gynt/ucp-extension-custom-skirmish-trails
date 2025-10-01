@@ -26,20 +26,27 @@ local function getUnitRecruitable(unit)
   if euroOffset ~= nil then
     local addr = memory.EURO_RECRUITABLE + euroOffset
     log(2, string.format("getUnitRecruitable: getting %s at %X", unit,  addr))
-    return core.writeInteger(addr)
+    return core.readInteger(addr) == 1
   end
 
   local mercOffset = MERC_RECRUITABLE_OFFSETS[unit]
   if mercOffset ~= nil then
     local addr = memory.MERC_RECRUITABLE + mercOffset
     log(2, string.format("getUnitRecruitable: getting %s at %X ", unit,  addr))
-    return core.writeInteger(addr)
+    return core.readInteger(addr) == 1
   end
 
   error( string.format("unknown unit: %s", unit))
 end
 
 local function setUnitRecruitable(unit, value)
+  if value == nil then return end
+
+  if type(value) == "boolean" then
+    if value == true then value = 1 end
+    if value == false then value = 0 end
+  end
+
   local euroOffset = EURO_RECRUITABLE_OFFSETS[unit]
   if euroOffset ~= nil then
     local addr = memory.EURO_RECRUITABLE + euroOffset
