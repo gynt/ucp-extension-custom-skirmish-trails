@@ -52,6 +52,23 @@ local function insertPostSkirmishSetupDetour()
     return registers
 
   end, detourLocation, detourSize)
+
+  core.detourCode(function(registers)
+    if core.readInteger(memory.IS_SKIRMISH_TRAIL) ~= 1 then return registers end
+
+    local trail, trailName, mission = memory.fetchCurrentTrail()
+    local missions = REGISTRY[trailName]
+    if missions == nil then
+      log(2, string.format("No custom missions registered for trail name: %s", trailName))
+      return registers
+    end
+
+    log(2, string.format("Committing start goods parameters for %s mission: %s", trailName, mission))
+    
+    local entry = missions[mission]
+    if entry == nil then log(-1, string.format("skirmish trail (%s) entry is unexpectedly nil: %s", trailName, mission)) end
+    interface.setStartGoods(entry)
+  end, core.AOBScan("A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? 89 44 24 10 "), 5)
 end
 
 local function applyTrail(trailName, path, missions, limit)

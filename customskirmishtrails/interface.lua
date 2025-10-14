@@ -134,7 +134,8 @@ local function commitEntry(addr, index, entry, trail)
 end
 
 local function commitEntryExtra(entry)
-  log(2, string.format("commitEntryExtra: %s", entry))
+  log(VERBOSE, string.format("commitEntryExtra: %s", entry))
+  log(VERBOSE, string.format("commitEntryExtra: data: %s", json:encode(entry)))
 
   startgoods.setStartGoods(entry)
 
@@ -160,5 +161,6 @@ return {
   commitEntryExtra = commitEntryExtra,
   commitTextDescription = commitTextDescription,
   commitStartGoldDisplay = commitStartGoldDisplay,
+  setStartGoods = startgoods.setStartGoods,
   STRING_ADDRESSES = STRING_ADDRESSES,
 }

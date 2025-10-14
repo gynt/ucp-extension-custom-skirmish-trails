@@ -281,7 +281,7 @@ local function getContents(path)
 end
 
 local function fail(name, expected, received, value)
-  error(string.format("header %s: expected a '%s' but received a '%s': %s", name, expected, received, value))
+  log(WARNING, string.format("header %s: expected a '%s' but received a '%s': %s", name, expected, received, value))
 end
 
 local function numberify(name, expected, received, value)

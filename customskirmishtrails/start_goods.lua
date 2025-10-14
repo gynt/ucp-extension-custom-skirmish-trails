@@ -20,12 +20,22 @@ local function setStartGood(good, value)
   core.writeInteger(addr, value)
 end
 
+local function hasPrefix(s, prefix)
+  return s:sub(1, prefix:len()) == prefix
+end
+
 local function setStartGoods(entry)
   for name, offset in pairs(common.resources) do
-    local rname = "resources_" .. name
-    if entry[rname] ~= nil then
-      setStartGood(name, entry[rname])
+    local names = {
+      "resource_" .. name,
+      "resources_" .. name,
+    }
+    for _, n in ipairs(names) do
+      if entry[n] ~= nil then
+        setStartGood(name, entry[n])
+      end
     end
+    
   end
 end
 
