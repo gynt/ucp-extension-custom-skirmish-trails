@@ -137,7 +137,8 @@ local function commitEntryExtra(entry)
   log(VERBOSE, string.format("commitEntryExtra: %s", entry))
   log(VERBOSE, string.format("commitEntryExtra: data: %s", json:encode(entry)))
 
-  startgoods.setStartGoods(entry)
+  -- set somewhere else!
+  -- startgoods.setStartGoods(entry)
 
   producibility.setWeaponsProducible(entry)
   
