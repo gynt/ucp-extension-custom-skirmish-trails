@@ -376,7 +376,6 @@ local function validateInput(input, index)
         -- always fine?
         if t == "binary" then
           input[name] = numberify(name, index,t, ty, value)
-          log(WARNING, input[name])
         elseif t == "number" or t == "integer" then
           input[name] = numberify(name, index,t, ty, value)
         elseif t ~= "string" then

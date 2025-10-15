@@ -32,8 +32,6 @@ local function setWeaponsProducible(entry)
     local entry_name = string.format("producible_%s", name)
     if entry[entry_name] ~= nil then
       setWeaponProducible(name, entry[entry_name])
-    else
-      log(2, string.format("setWeaponsProducible: no weapon producible set: %s", entry_name))
     end
   end
 end
