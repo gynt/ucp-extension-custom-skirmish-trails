@@ -68,11 +68,17 @@ end
 
 local function setUnitsRecruitable(entry)
   for name, offset in pairs(EURO_RECRUITABLE_OFFSETS) do
-    setUnitRecruitable(name, entry["recruitable_" .. name])
+    local value = entry["recruitable_" .. name]
+    if value ~= nil then
+      setUnitRecruitable(name, value)
+    end
   end
 
   for name, offset in pairs(MERC_RECRUITABLE_OFFSETS) do
-    setUnitRecruitable(name, entry["recruitable_" .. name])
+    local value = entry["recruitable_" .. name]
+    if value ~= nil then
+      setUnitRecruitable(name, value)
+    end
   end
 end
 

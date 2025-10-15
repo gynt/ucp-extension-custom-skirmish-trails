@@ -45,7 +45,6 @@ local HEADERS = {
 
 local HEADERS_EXTRA = {
   "mission_name",
-  "gold",
   "producible_bows",
   "producible_crossbows",
   "producible_maces",
@@ -69,17 +68,14 @@ local HEADERS_EXTRA = {
   "resource_wood",
   "resource_hops",
   "resource_stone",
- -- "resource_partialstone",
   "resource_iron",
   "resource_pitch",
- -- "resource_partialpitch",
   "resource_wheat",
   "resource_bread",
   "resource_cheese",
   "resource_meat",
   "resource_apple",
   "resource_ale",
-  "resource_gold",
   "resource_flour",
   "resource_bow",
   "resource_crossbow",
@@ -101,7 +97,6 @@ local HEADERS_EXTRA = {
   "tradeable_apple",
   "tradeable_ale",
   "tradeable_beer",
-  "tradeable_gold",
   "tradeable_flour",
   "tradeable_bow",
   "tradeable_crossbow",
@@ -128,6 +123,8 @@ local HEADERS_EXTRA = {
   "gold_player_7",
   "gold_player_8",
 }
+
+---@alias binary 0|1
 
 local HEADERS_TYPES = {
   ["map_name"] = "string", 
@@ -167,7 +164,6 @@ local HEADERS_TYPES = {
 	["aiv_type7"] = "integer",
 	["aiv_type8"] = "integer",
   ["mission_name"] = "string",
-  ["gold"] = "integer",
   ["producible_bows"] = "binary",
   ["producible_crossbows"] = "binary",
   ["producible_maces"] = "binary",
@@ -191,17 +187,14 @@ local HEADERS_TYPES = {
   ["resource_wood"] = "integer",
   ["resource_hops"] = "integer",
   ["resource_stone"] = "integer",
- -- ["resource_partialstone"] = "integer",
   ["resource_iron"] = "integer",
   ["resource_pitch"] = "integer",
- -- ["resource_partialpitch"] = "integer",
   ["resource_wheat"] = "integer",
   ["resource_bread"] = "integer",
   ["resource_cheese"] = "integer",
   ["resource_meat"] = "integer",
   ["resource_apple"] = "integer",
   ["resource_ale"] = "integer",
-  ["resource_gold"] = "integer",
   ["resource_flour"] = "integer",
   ["resource_bow"] = "integer",
   ["resource_crossbow"] = "integer",
@@ -223,7 +216,6 @@ local HEADERS_TYPES = {
   ["tradeable_apple"] = "binary",
   ["tradeable_ale"] = "binary",
   ["tradeable_beer"] = "binary",
-  ["tradeable_gold"] = "binary",
   ["tradeable_flour"] = "binary",
   ["tradeable_bow"] = "binary",
   ["tradeable_crossbow"] = "binary",
@@ -260,6 +252,68 @@ local ALLOW_NIL = {
   ["gold_player_6"] = true,
   ["gold_player_7"] = true,
   ["gold_player_8"] = true,
+
+  ["resource_wood"] = true,
+  ["resource_hops"] = true,
+  ["resource_stone"] = true,
+  ["resource_iron"] = true,
+  ["resource_pitch"] = true,
+  ["resource_wheat"] = true,
+  ["resource_bread"] = true,
+  ["resource_cheese"] = true,
+  ["resource_meat"] = true,
+  ["resource_apple"] = true,
+  ["resource_ale"] = true,
+  ["resource_flour"] = true,
+  ["resource_bow"] = true,
+  ["resource_crossbow"] = true,
+  ["resource_spear"] = true,
+  ["resource_pike"] = true,
+  ["resource_mace"] = true,
+  ["resource_sword"] = true,
+  ["resource_leatherarmor"] = true,
+  ["resource_ironarmor"] = true,
+  ["producible_bows"] = true,
+  ["producible_crossbows"] = true,
+  ["producible_maces"] = true,
+  ["producible_pikes"] = true,
+  ["producible_spears"] = true,
+  ["producible_swords"] = true,
+  ["recruitable_archers"] = true,
+  ["recruitable_spearmen"] = true,
+  ["recruitable_macemen"] = true,
+  ["recruitable_crossbowmen"] = true,
+  ["recruitable_pikemen"] = true,
+  ["recruitable_swordsmen"] = true,
+  ["recruitable_knights"] = true,
+  ["recruitable_arabian_bows"] = true,
+  ["recruitable_slaves"] = true,
+  ["recruitable_slingers"] = true,
+  ["recruitable_assassins"] = true,
+  ["recruitable_horse_archers"] = true,
+  ["recruitable_arabian_swordsmen"] = true,
+  ["recruitable_fire_throwers"] = true,
+  ["tradeable_wood"] = true,
+  ["tradeable_hops"] = true,
+  ["tradeable_stone"] = true,
+  ["tradeable_iron"] = true,
+  ["tradeable_pitch"] = true,
+  ["tradeable_wheat"] = true,
+  ["tradeable_bread"] = true,
+  ["tradeable_cheese"] = true,
+  ["tradeable_meat"] = true,
+  ["tradeable_apple"] = true,
+  ["tradeable_ale"] = true,
+  ["tradeable_beer"] = true,
+  ["tradeable_flour"] = true,
+  ["tradeable_bow"] = true,
+  ["tradeable_crossbow"] = true,
+  ["tradeable_spear"] = true,
+  ["tradeable_pike"] = true,
+  ["tradeable_mace"] = true,
+  ["tradeable_sword"] = true,
+  ["tradeable_leatherarmor"] = true,
+  ["tradeable_ironarmor"] = true,
 }
 
 local function prefixHeaders(contents)
@@ -272,69 +326,82 @@ local function getContents(path)
   if handle == nil then error(debug.traceback(err)) end
   local contents = handle:read("*all")
   log(2, string.format("raw csv contents\n%s", contents))
-  if contents:sub(1, ("map_name"):len()) ~= "map_name" then
-    log(2, string.format("getContents: prefixing headers"))
-     contents = prefixHeaders(contents)
-  end
+  -- if contents:sub(1, ("map_name"):len()) ~= "map_name" then
+  --   log(2, string.format("getContents: prefixing headers"))
+  --    contents = prefixHeaders(contents)
+  -- end
   handle:close()  
   return contents
 end
 
-local function fail(name, expected, received, value)
-  log(WARNING, string.format("header %s: expected a '%s' but received a '%s': %s", name, expected, received, value))
+local fails = {}
+
+local function fail(name, index, expected, received, value)
+  local msg = string.format("header %s: entry %s, expected a '%s' but received a '%s' (length: %d): %s ", name, index, expected, received, (value or ""):len(), value)
+  table.insert(fails, msg)
+  log(WARNING, msg)
 end
 
-local function numberify(name, expected, received, value)
+local function numberify(name, index, expected, received, value)
   local nvalue = tonumber(value)
-  if nvalue == nil and ALLOW_NIL[name] == false then
-    fail(name, expected, received, value)
+  if nvalue == nil then
+    if ALLOW_NIL[name] then return nvalue end
   end
+
+  if nvalue == nil then
+    fail(name, expected, received, value)
+  elseif expected == "binary" and (nvalue ~= 1 and nvalue ~= 0) then
+    fail(name, index, expected, received, value)
+  elseif expected == "integer" then
+    local ivalue = tonumber(tostring(nvalue), 10)
+    if (ivalue == nil and not ALLOW_NIL[name]) or ivalue ~= nvalue then
+      fail(name, index, expected, received, value)
+    end
+    return ivalue
+  end
+
   return nvalue
 end
 
-local function validateInput(input)
+local function validateInput(input, index)
+  index = index or "<NA>"
 
   for name, value in pairs(input) do
     local t = HEADERS_TYPES[name]
-    if t == nil then error(string.format("undefined header: %s", name)) end
-    local ty = type(value)
-    if ty == "string" then
-      -- always fine?
-      if t == "binary" then
-        local nvalue = numberify(name, t, ty, value)
-        input[name] = nvalue
-        if nvalue ~= 1 and nvalue ~= 0 then
-          fail(name, t, ty, value)
-        end
-      elseif t == "number" or t == "integer" then
-        input[name] = numberify(name, t, ty, value)
-      elseif t ~= "string" then
-        fail(name, t, ty, value)
-      end
-    elseif ty == "number" then
-      if t == "integer" then
-        local iv = tonumber(string.format("%i", value), 10)
-        if iv == nil or iv ~= value then
-          fail(name, t, ty, value)
-        end
-      elseif t == "binary" then
-        if value ~= 0 and value ~= 1 then
-          fail(name, t, ty, value)
-        end
-      else
-        fail(name, t, ty, value)
-      end
-    elseif ty == "boolean" then
-      if t ~= "boolean" then fail(name, t, ty, value) end
+    if t == nil then 
+      fail(name, index, "nil", type(value), value)
     else
-      error(string.format("unsupported type for '%s': %s", name, value))
+      local ty = type(value)
+      if ty == "string" then
+        -- always fine?
+        if t == "binary" then
+          input[name] = numberify(name, index,t, ty, value)
+          log(WARNING, input[name])
+        elseif t == "number" or t == "integer" then
+          input[name] = numberify(name, index,t, ty, value)
+        elseif t ~= "string" then
+          fail(name, index, t, ty, value)
+        end
+      elseif ty == "number" then
+        if t == "integer" then
+          input[name] = numberify(name, index,t, ty, value)
+        elseif t == "binary" then
+          input[name] = numberify(name, index,t, ty, value)
+        else
+          fail(name, index, t, ty, value)
+        end
+      elseif ty == "boolean" then
+        if t ~= "boolean" then fail(name, index, t, ty, value) end
+      else
+        error(string.format("unsupported type for '%s': %s", name, value))
+      end
     end
   end
 
 end
 
-local function pvalidateInput(input)
-  return pcall(validateInput, input)
+local function pvalidateInput(input, index)
+  return pcall(validateInput, input, index)
 end
 
 local function readCSV(path, limit)
@@ -351,11 +418,20 @@ local function readCSV(path, limit)
     table.insert(entries, line)
   end
 
+  -- clear fails table
+  fails = {}
+
   for index, entry in ipairs(entries) do
-    local valid, err = pvalidateInput(entry)
+    local valid, err = pvalidateInput(entry, index)
     if not valid then
-      log(WARNING, string.format("entry #%i contains invalid information: %s", index, err))
+      local msg = string.format("entry #%i contains invalid information: %s", index, err)
+      log(WARNING, msg)
+      table.insert(fails, msg)
     end
+  end
+
+  if table.length(fails) > 0 then
+    log(ERROR, string.format("There were %d warnings related to the skirmish trail csv file, consult the log for details", #fails))
   end
 
   return entries
