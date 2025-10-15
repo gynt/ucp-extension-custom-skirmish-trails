@@ -37,3 +37,15 @@ options:
     filter: files
     type: string
     value: ''
+- category:
+  - Developer
+  - Custom Skirmish Trails
+  name: extreme
+  hasHeader: false
+  header: "Enable strict mode to check for csv errors" # '{{extreme}}'
+  text: "Which may result in error message boxes at game start" # '{{extreme_descr}}'
+  display: UCP2Switch
+  url: custom-skirmish-trails.csv.strict_format
+  contents:
+    type: boolean
+    value: false

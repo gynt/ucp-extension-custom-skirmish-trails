@@ -4,6 +4,8 @@ local ucp = ucp or {internal = {
 }}
 local csv = require("customskirmishtrails.vendor.lua-csv")
 
+local strictness = "warning"
+
 local HEADERS = {
   "map_name", 
   "fairness",
@@ -430,7 +432,17 @@ local function readCSV(path, limit)
   end
 
   if table.length(fails) > 0 then
-    log(ERROR, string.format("There were %d warnings related to the skirmish trail csv file, consult the log for details", #fails))
+    local ll = WARNING
+    if strictness == "warning" then
+      ll = WARNING
+    elseif strictness == "error" then
+      ll = ERROR
+    elseif strictness == "fatal" then
+      ll = FATAL
+    end
+    log(ll, string.format("There were %d warnings related to the skirmish trail csv file, consult the log for details", #fails))
+
+    
   end
 
   return entries
@@ -442,6 +454,7 @@ end
 -- handle:close()
 
 return {
+  setStrictness = function(s) strictness = s end,
   readCSV = readCSV,
   HEADERS =  HEADERS,
   HEADERS_EXTRA = HEADERS_EXTRA,

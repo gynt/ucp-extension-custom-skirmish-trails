@@ -111,6 +111,12 @@ end
 
 return {
   enable = function(self, config)
+    if config.csv.strict_format == true then
+      cst_io.setStrictness("error")
+    else
+      cst_io.setStrictness("warning")
+    end
+
     local _, skirmishTrailMissions, extremeTrailMissions, warchestTrailMissions = utils.AOBExtract("8D ? I(? ? ? ?) 75 08 8D ? I(? ? ? ?) EB 0B 83 F9 01 75 06 8D ? I(? ? ? ?) 53")
 
     hooks.registerHookCallback("afterInit", function()
