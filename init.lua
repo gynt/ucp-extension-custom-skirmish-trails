@@ -21,22 +21,16 @@ local function insertPostSkirmishSetupDetour()
   -- local detourLocation, detourSize = core.AOBScan("A1 ? ? ? ? 8D 0C 80 03 C9 89 ? ? ? ? ?"), 5
   local detourLocation, detourSize = core.AOBScan("8B 8C 24 ? ? 00 00 5f 5e 89 ? ? ? ? ? 89 ? ? ? ? ? 89 ? ? ? ? ? 89 ? ? ? ? ? 5B 33 CC"), 7
   core.detourCode(function(registers)
-    if core.readInteger(memory.IS_SKIRMISH_TRAIL) ~= 1 then
+    local isTrail, trail, trailName, mission = fetchCurrentTrail()
+    if not isTrail then
       log(2, "not in skirmish trail")
       return registers
     end
 
-    local trail =  core.readInteger(memory.CURRENT_TRAIL_TYPE) 
-    local trailName = TRAIL_TYPES[trail]
-
     if trailName == nil then error(string.format("invalid trail: %s", trail)) end
 
     log(2, string.format("trail: %s", trailName))
-
-    local progressAddr = TRAIL_PROGRESS_ADDRESSES[trailName]
-
-    local mission = core.readInteger(progressAddr) + 1
-
+    
     local missions = REGISTRY[trailName]
     if missions == nil then
       log(2, string.format("No custom missions registered for trail name: %s", trailName))
@@ -56,7 +50,8 @@ local function insertPostSkirmishSetupDetour()
   core.detourCode(function(registers)
     if core.readInteger(memory.IS_SKIRMISH_TRAIL) ~= 1 then return registers end
 
-    local trail, trailName, mission = memory.fetchCurrentTrail()
+    local isTrail, trail, trailName, mission = memory.fetchCurrentTrail()
+    if not isTrail then return registers end
     local missions = REGISTRY[trailName]
     if missions == nil then
       log(2, string.format("No custom missions registered for trail name: %s", trailName))
@@ -89,7 +84,9 @@ end
 local function detourSwitchToMenu()
   core.detourCode(function(registers)
     log(2, string.format("detour: SetupSkirmishMode: %s", ""))
-    local trail, trailName, mission = fetchCurrentTrail()
+
+    -- we aren't in a trail setting yet (we are preparting for it), so we ignore the isTrail part of the return values
+    local _, trail, trailName, mission = fetchCurrentTrail()
     if trail ~= nil then
       local missions = REGISTRY[trailName]
       if missions == nil then

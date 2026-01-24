@@ -56,9 +56,14 @@ function startgold.enable()
   -- pointer start gold = ESI - 7618
   -- playerID = EBX
   core.detourCode(function (registers)
-    log(VERBOSE, string.format("startgold: ..."))
-    local trail, trailName, mission = memory.fetchCurrentTrail()
+    local isTrail, trail, trailName, mission = memory.fetchCurrentTrail()
+    if not isTrail then 
+      log(VERBOSE, "not in trail mode")
+      return registers
+    end
     if trail ~= nil then
+      log(VERBOSE, string.format("startgold: %s, %s", tostring(trailName), tostring(mission)))
+
       local missions = memory.REGISTRY[trailName]
       if missions == nil then
         log(VERBOSE, string.format("No custom missions registered for trail name: %s", trailName))
@@ -125,8 +130,9 @@ function startgold.enable()
 end
 
 function startgold.setStartGoldDisplay(entry)
-  local trail, trailName, mission = memory.fetchCurrentTrail()
-
+  -- we aren't in a trail setting yet (we are preparting for it), so we ignore the isTrail part of the return values
+  local _, trail, trailName, mission = memory.fetchCurrentTrail()
+  
   core.writeInteger(pCurrentTrail, trail)
   core.writeInteger(pCurrentMission, mission - 1)
 

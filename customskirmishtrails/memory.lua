@@ -39,6 +39,7 @@ local TRAIL_PROGRESS_ADDRESSES = {
 }
 
 local function fetchCurrentTrail()
+    local isTrail = core.readInteger(isSkirmishTrailAddr) == 1
     local trail =  core.readInteger(currentTrailTypeAddr) 
     local trailName = TRAIL_TYPES[trail]
 
@@ -48,7 +49,7 @@ local function fetchCurrentTrail()
 
     local mission = core.readInteger(progressAddr) + 1
     
-    return trail, trailName, mission
+    return isTrail, trail, trailName, mission
 end
 
 return {
