@@ -4,7 +4,7 @@ local ucp = ucp or {internal = {
 }}
 local csv = require("customskirmishtrails.vendor.lua-csv")
 
-local strictness = "warning"
+local strict = false
 
 local HEADERS = {
   "map_name", 
@@ -124,6 +124,27 @@ local HEADERS_EXTRA = {
   "gold_player_6",
   "gold_player_7",
   "gold_player_8",
+  "player1_name",
+  "player2_name",
+  "player3_name",
+  "player4_name",
+  "player5_name",
+  "player6_name",
+  "player7_name",
+  "player8_name",
+  "player1_lord",
+  "player1_skip_start_units",
+  "player2_color",
+  "player3_color",
+  "player4_color",
+  "player5_color",
+  "player6_color",
+  "player7_color",
+  "player8_color",
+  "mission_type",
+  "difficulty_scaling",
+  "unit_limit",
+  "scenario_briefing",
 }
 
 ---@alias binary 0|1
@@ -243,9 +264,46 @@ local HEADERS_TYPES = {
   ["gold_player_6"] = "integer",
   ["gold_player_7"] = "integer",
   ["gold_player_8"] = "integer",
+  ["player1_name"] = "string",
+  ["player2_name"] = "string",
+  ["player3_name"] = "string",
+  ["player4_name"] = "string",
+  ["player5_name"] = "string",
+  ["player6_name"] = "string",
+  ["player7_name"] = "string",
+  ["player8_name"] = "string",
+  ["player1_lord"] = "string",
+  ["player1_skip_start_units"] = "binary",
+  ["player2_color"] = "string",
+  ["player3_color"] = "string",
+  ["player4_color"] = "string",
+  ["player5_color"] = "string",
+  ["player6_color"] = "string",
+  ["player7_color"] = "string",
+  ["player8_color"] = "string",
+  ["mission_type"] = "string",
+  ["difficulty_scaling"] = "string",
+  ["unit_limit"] = "string",
+  ["scenario_briefing"] = "string",
+  ["icon_locked"] = "integer",
+  ["icon_available"] = "integer",
+  ["icon_won"] = "integer",
 }
 
 local ALLOW_NIL = {
+  ["player1_name"] = true,
+  ["player2_name"] = true,
+  ["player3_name"] = true,
+  ["player4_name"] = true,
+  ["player5_name"] = true,
+  ["player6_name"] = true,
+  ["player7_name"] = true,
+  ["player8_name"] = true,
+  ["player1_lord"] = true,
+  ["player1_skip_start_units"] = true,
+  ["icon_locked"] = true,
+  ["icon_available"] = true,
+  ["icon_won"] = true,
   ["gold_player_1"] = true,
   ["gold_player_2"] = true,
   ["gold_player_3"] = true,
@@ -318,60 +376,59 @@ local ALLOW_NIL = {
   ["tradeable_ironarmor"] = true,
 }
 
-local function prefixHeaders(contents)
-  return table.concat(HEADERS,",") .. "\r\n" .. contents
-end
-
-local function getContents(path)
-  local path = ucp.internal.resolveAliasedPath(path)
-  local handle, err = io.open(path,'rb')
-  if handle == nil then error(debug.traceback(err)) end
-  local contents = handle:read("*all")
-  log(2, string.format("raw csv contents\n%s", contents))
-  -- if contents:sub(1, ("map_name"):len()) ~= "map_name" then
-  --   log(2, string.format("getContents: prefixing headers"))
-  --    contents = prefixHeaders(contents)
-  -- end
-  handle:close()  
-  return contents
+local function readBytes(path)
+  local opened, handle, err = pcall(io.open, path, "rb")
+  if not opened or handle == nil then return nil, opened and err or handle end
+  local contents, readError = handle:read("a")
+  handle:close()
+  return contents, readError
 end
 
 local fails = {}
 
 local function fail(name, index, expected, received, value)
-  local msg = string.format("header %s: entry %s, expected a '%s' but received a '%s' (length: %d): %s ", name, index, expected, received, (value or ""):len(), value)
+  local text = tostring(value or "")
+  local msg = string.format("header %s: entry %s, expected a '%s' but received a '%s' (length: %d): %s ", name, index, expected, received, text:len(), text)
   table.insert(fails, msg)
-  log(WARNING, msg)
+  -- every single problem only in strict mode; otherwise one summary line per file
+  log(strict and WARNING or VERBOSE, msg)
 end
 
 local function numberify(name, index, expected, received, value)
   local nvalue = tonumber(value)
-  if nvalue == nil then
-    if ALLOW_NIL[name] then return nvalue end
-  end
-
-  if nvalue == nil then
-    fail(name, expected, received, value)
-  elseif expected == "binary" and (nvalue ~= 1 and nvalue ~= 0) then
+  if value == "" and ALLOW_NIL[name] then return nil end
+  if nvalue == nil or (expected == "binary" and nvalue ~= 1 and nvalue ~= 0)
+      or (expected == "integer" and math.tointeger(nvalue) == nil) then
     fail(name, index, expected, received, value)
-  elseif expected == "integer" then
-    local ivalue = tonumber(tostring(nvalue), 10)
-    if (ivalue == nil and not ALLOW_NIL[name]) or ivalue ~= nvalue then
-      fail(name, index, expected, received, value)
-    end
-    return ivalue
+    return nil
   end
-
   return nvalue
 end
 
-local function validateInput(input, index)
+-- a scenario mission plays the map with its own players and ignores these columns
+local function scenarioUnused(name)
+  return name == "fairness" or name == "start_levels" or name:match("^start_position%d$")
+    or name:match("^team%d$") or name:match("^aiv_type%d$")
+end
+
+local function validateInput(input, index, source, jsonRow)
   index = index or "<NA>"
+  local isScenario = require("customskirmishtrails.scenario").isScenario(input)
 
   for name, value in pairs(input) do
     local t = HEADERS_TYPES[name]
-    if t == nil then 
-      fail(name, index, "nil", type(value), value)
+    if name == "" or (name == "map_name" and value == "") then
+      -- Unnamed columns and blank map names leave the native row unchanged.
+      input[name] = nil
+    elseif value == "" and jsonRow ~= nil and t ~= nil and t ~= "string" and jsonRow[name] == nil then
+      -- Absent JSON numbers and flags use the same defaults as absent CSV columns.
+      input[name] = nil
+    elseif isScenario and scenarioUnused(name) and tostring(value):match("^%s*$") then
+      input[name] = nil
+    elseif t == nil then
+      if not source then
+        fail(name, index, "nil", type(value), value)
+      end
     else
       local ty = type(value)
       if ty == "string" then
@@ -401,14 +458,17 @@ local function validateInput(input, index)
 
 end
 
-local function pvalidateInput(input, index)
-  return pcall(validateInput, input, index)
-end
-
-local function readCSV(path, limit)
+---Reads the trail csv file `path`, or `contents` in its place.
+local function readCSV(path, limit, contents, requireMissions, jsonRows)
   log(2, string.format("readCSV: %s", path))
-  local contents = getContents(path)
-  local c = csv.openstring(contents, {header = true, })
+  local reason
+  if contents == nil then
+    contents, reason = readBytes(path)
+  end
+  if contents == nil then
+    return nil, string.format("%s: %s", tostring(path), tostring(reason))
+  end
+  local c = csv.openstring(contents, { header = true, separator = requireMissions and ',' or nil, filename = path })
 
   local entries = {}
   for line in c:lines() do
@@ -416,46 +476,40 @@ local function readCSV(path, limit)
     if limit < 1 then
       break
     end
+    if requireMissions and (type(line.map_name) ~= "string" or line.map_name == "") then
+      return nil, string.format("mission %d has no map_name", #entries + 1)
+    end
     table.insert(entries, line)
+  end
+
+  if requireMissions and #entries == 0 then
+    return nil, "no mission rows"
   end
 
   -- clear fails table
   fails = {}
 
   for index, entry in ipairs(entries) do
-    local valid, err = pvalidateInput(entry, index)
+    local valid, err = pcall(validateInput, entry, index, requireMissions, jsonRows and jsonRows[index])
     if not valid then
       local msg = string.format("entry #%i contains invalid information: %s", index, err)
+      if requireMissions then return nil, msg end
       log(WARNING, msg)
       table.insert(fails, msg)
     end
   end
 
-  if table.length(fails) > 0 then
-    local ll = WARNING
-    if strictness == "warning" then
-      ll = WARNING
-    elseif strictness == "error" then
-      ll = ERROR
-    elseif strictness == "fatal" then
-      ll = FATAL
-    end
-    log(ll, string.format("There were %d warnings related to the skirmish trail csv file, consult the log for details", #fails))
-
-    
+  if #fails > 0 and not strict then
+    log(WARNING, string.format("%d problems in the trail csv file %s; turn on strict mode in your profile to see them", #fails, path))
   end
 
   return entries
 end
 
--- local originalContents
--- local handle = io.open("extremeTrail.csv",'rb')
--- originalContents =  prefixHeaders(handle:read("*all"))
--- handle:close()
-
 return {
-  setStrictness = function(s) strictness = s end,
+  setStrict = function(value) strict = value end,
   readCSV = readCSV,
+  readBytes = readBytes,
   HEADERS =  HEADERS,
   HEADERS_EXTRA = HEADERS_EXTRA,
   HEADERS_TYPES = HEADERS_TYPES,

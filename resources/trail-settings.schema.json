@@ -1,0 +1,325 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/gynt/ucp-extension-custom-skirmish-trails/resources/trail-settings.schema.json",
+  "title": "Custom Skirmish Trails: trail settings",
+  "description": "Settings for one skirmish trail as a whole. Every entry is optional; a missing or empty entry keeps the game's own value. Relative file paths are taken from the folder of this file.",
+  "type": "object",
+  "definitions": {
+    "chickenBudget": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+        { "const": "unlimited" }
+      ]
+    }
+  },
+  "properties": {
+    "$schema": {
+      "description": "Optional schema path or URL for editor validation and hover help.",
+      "type": "string"
+    },
+    "trail_type": {
+      "description": "Use First, Warchest or Extreme to restrict this file to that trail, or omit to use the trail selected in the UCP GUI.",
+      "type": "string",
+      "enum": [
+        "First",
+        "Warchest",
+        "Extreme"
+      ]
+    },
+    "trail_title": {
+      "description": "Title under the trail button, with the game's title used if omitted and a language file able to override it.",
+      "type": "string"
+    },
+    "trail_summary": {
+      "description": "Summary under the trail title, wrapping after 540 pixels; omission keeps the game's text and a language file can override it.",
+      "type": "string"
+    },
+    "mission_locked_text": {
+      "description": "Briefing text shown before a dated scenario opens, with {date} replaced by its opening date; omission keeps the normal briefing unless translated.",
+      "type": "string"
+    },
+    "trail_id": {
+      "description": "Names the files in the module's user data folder that keep this trail's progress (progress-<trail_id>.txt), passed missions (sides-<trail_id>.txt) and results (results-<trail_id>.txt), apart from the game's own progress and every other trail_id. Lowercase letters, digits, '-' and '_'. Omitted: the progress is the game's own, and the other files take the trail's trail_type in lowercase in place of <trail_id> (sides-extreme.txt for the Extreme trail), so first, warchest and extreme can't be a trail_id.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*$",
+      "maxLength": 64,
+      "not": { "enum": ["first", "warchest", "extreme"] }
+    },
+    "chickens": {
+      "description": "Total skip tokens of the trail, from 0 to 2147483647 or unlimited; omission keeps the game's budget.",
+      "$ref": "#/definitions/chickenBudget"
+    },
+    "starting_year": {
+      "description": "The year the trail's first mission starts in. The game uses 1100 for the first trail and 1130 for the Warchest and the Extreme trail.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9999
+    },
+    "trail_visuals": {
+      "description": "Pictures that replace the game's own for this trail.",
+      "type": "object",
+      "properties": {
+        "trail_button_idle": {
+          "description": "Picture path for the trail button at rest, such as a .png; omission keeps the game's button.",
+          "type": "string"
+        },
+        "trail_button_highlighted": {
+          "description": "Picture path for the trail button under the mouse, such as a .png; omission keeps the game's button.",
+          "type": "string"
+        },
+        "trail_background": {
+          "description": "Trail background path at the game's original size (.tgx, .png, .jpg, .bmp or .gif); omission keeps the game's background.",
+          "type": "string"
+        },
+        "mission_icons": {
+          "description": "Path to a .gm1 sheet of the missions' icon pictures: pictures of 100 x 100 of the type of skirmish_trail_icons.gm1, as many as the trail needs; omission keeps the game's flags.",
+          "type": "string"
+        },
+        "chicken_idle": {
+          "description": "Picture path for the trail screen's chicken at rest (185 x 185); omission keeps the game's.",
+          "type": "string"
+        },
+        "chicken_highlighted": {
+          "description": "Picture path for the trail screen's chicken under the mouse (185 x 185); omission keeps the game's.",
+          "type": "string"
+        },
+        "skirmish_masters_idle": {
+          "description": "Picture path for the trail screen's Skirmish Masters button at rest (96 x 88); omission keeps the game's.",
+          "type": "string"
+        },
+        "skirmish_masters_highlighted": {
+          "description": "Picture path for the trail screen's Skirmish Masters button under the mouse (96 x 88); omission keeps the game's.",
+          "type": "string"
+        },
+        "back_idle": {
+          "description": "Picture path for the trail screen's back hand at rest (180 x 180); omission keeps the game's.",
+          "type": "string"
+        },
+        "back_highlighted": {
+          "description": "Picture path for the trail screen's back hand under the mouse (180 x 180); omission keeps the game's.",
+          "type": "string"
+        },
+        "next_idle": {
+          "description": "Picture path for the trail screen's hand to the briefing at rest (180 x 180); omission keeps the game's.",
+          "type": "string"
+        },
+        "next_highlighted": {
+          "description": "Picture path for the trail screen's hand to the briefing under the mouse (180 x 180); omission keeps the game's.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "trail_mission_positions": {
+      "description": "One button position per mission on the 800 x 600 trail screen (up to 50 for First or 30 for Warchest and Extreme); omission keeps the game's positions. Not used with a route of files, whose nodes have the positions.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "description": "Required horizontal button coordinate in pixels (0-800).",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 800
+          },
+          "y": {
+            "description": "Required vertical button coordinate in pixels (0-600).",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 600
+          }
+        },
+        "required": [
+          "x",
+          "y"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "trail_route": {
+      "description": "The trail's missions as nodes, keyed by a node id (letters, digits, _ and -). A node is one mission, given by file and position or by mission number; all nodes of a route use the same form. requires and requires_any set which nodes come first, so paths can branch and join; kind side makes a side mission. Branches and side missions need mission_icons. Omitted: the missions are played in their order.",
+      "type": "object",
+      "propertyNames": { "pattern": "^[A-Za-z0-9_-]+$" },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "description": "A route of files: this node's mission file (format 1, mission.schema.json), relative to this file. Every node of the route then has a file and a position.",
+            "type": "string",
+            "minLength": 1
+          },
+          "position": {
+            "description": "A route of files: the node's button on the 800 x 600 trail screen.",
+            "type": "object",
+            "properties": {
+              "x": { "description": "Horizontal position in pixels (0-800).", "type": "integer", "minimum": 0, "maximum": 800 },
+              "y": { "description": "Vertical position in pixels (0-600).", "type": "integer", "minimum": 0, "maximum": 600 }
+            },
+            "required": ["x", "y"],
+            "additionalProperties": false
+          },
+          "mission": {
+            "description": "A route by number: the mission's number in the trail's mission data, its mission file's number (or csv line). Missions the route doesn't name are main missions.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "kind": {
+            "description": "main (the default) or side. A side mission doesn't move the trail on, can't be skipped with a chicken and can't be the end.",
+            "type": "string",
+            "enum": ["main", "side"],
+            "default": "main"
+          },
+          "end": {
+            "description": "true for the node whose win finishes the trail; nothing may require it. Without it the end is the one main node no other node requires (a route by number: its last mission).",
+            "type": "boolean"
+          },
+          "requires": {
+            "description": "Node ids that must all be passed first. A node is passed once it is won, a main node also when a chicken skipped it. In a route by number a main mission without requires and requires_any follows the main mission before it.",
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "requires_any": {
+            "description": "Node ids of which at least one must be passed first.",
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "unlock": {
+            "description": "The node opens only once this condition holds.",
+            "$ref": "condition.schema.json"
+          },
+          "reward": {
+            "description": "Given once, at the node's first win (not at a skip with a chicken).",
+            "type": "object",
+            "properties": {
+              "chickens": {
+                "description": "More chickens on this trail, on top of its chickens budget (or the game's 3); no change with unlimited.",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              }
+            },
+            "required": ["chickens"],
+            "additionalProperties": false
+          }
+        },
+        "oneOf": [
+          { "required": ["file", "position"], "not": { "required": ["mission"] } },
+          { "required": ["mission"], "not": { "anyOf": [{ "required": ["file"] }, { "required": ["position"] }] } }
+        ]
+      }
+    },
+    "trail_missions": {
+      "description": "Names the source of a trail's mission data.",
+      "type": "object",
+      "properties": {
+        "base_name": {
+          "description": "Mission folder path, written without the .csv suffix. A route can name its mission files directly.",
+          "type": "string"
+        },
+        "data_mode": {
+          "description": "A JSON trail source reads mission files (json_folder). Legacy profiles also support csv and automatic.",
+          "type": "string",
+          "enum": [
+            "csv",
+            "json_folder",
+            "automatic"
+          ],
+          "default": "csv"
+        }
+      },
+      "required": [
+        "base_name"
+      ],
+      "additionalProperties": false
+    },
+    "trail_text_files": {
+      "description": "Folder of <language>.json files or an object mapping languages to file paths; omission keeps the original text. See trail-language.schema.json for the file format.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "ai_character_mapping": {
+      "description": "Unique AI aliases for mission files and CSV, with omitted aliases keeping the original keys and other AI keys reserved.",
+      "type": "object",
+      "properties": {
+        "SK_RAT": {
+          "description": "Text alias for SK_RAT, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_SNAKE": {
+          "description": "Text alias for SK_SNAKE, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_PIG": {
+          "description": "Text alias for SK_PIG, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_WOLF": {
+          "description": "Text alias for SK_WOLF, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_SALADIN": {
+          "description": "Text alias for SK_SALADIN, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_CALIPH": {
+          "description": "Text alias for SK_CALIPH, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_SULTAN": {
+          "description": "Text alias for SK_SULTAN, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_RICHARD": {
+          "description": "Text alias for SK_RICHARD, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_FREDERICK": {
+          "description": "Text alias for SK_FREDERICK, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_PHILLIP": {
+          "description": "Text alias for SK_PHILLIP, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_WAZIR": {
+          "description": "Text alias for SK_WAZIR, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_EMIR": {
+          "description": "Text alias for SK_EMIR, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_NIZAR": {
+          "description": "Text alias for SK_NIZAR, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_SHERIFF": {
+          "description": "Text alias for SK_SHERIFF, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_MARSHAL": {
+          "description": "Text alias for SK_MARSHAL, with the original key used if omitted or empty.",
+          "type": "string"
+        },
+        "SK_ABBOT": {
+          "description": "Text alias for SK_ABBOT, with the original key used if omitted or empty.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

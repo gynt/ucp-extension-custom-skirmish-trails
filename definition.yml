@@ -1,6 +1,19 @@
 name: custom-skirmish-trails
-author: gynt
+display-name: Custom Skirmish Trails
+author: gynt, Monsterfish, Heroesflorian, Krarilotus
 type: module
-version: 1.2.6
+version: 1.5.0
 dependencies:
   textResourceModifier: ">= 0.3.0" 
+  gmResourceModifier: "^0.3.2"
+  files: ">= 1.2.0"
+  framework: ">=3.0.8"
+  frontend: ">=1.0.2"
+tags:
+- scenarios
+- maps
+meta:
+  version: 1.0.0
+game:
+- SHC==1.41
+- SHCE==1.41

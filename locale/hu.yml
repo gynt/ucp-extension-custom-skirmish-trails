@@ -1,0 +1,12 @@
+trail_source_text: Válassz egy hadjárat JSON- vagy CSV-fájlt. Hagyd üresen a játék eredeti hadjáratához.
+option_1_header: Első hadjárat fájlja (First Edition)
+option_1_text: Nyisd meg az Első hadjáratot a Csetepaté-hadjárat menüből.
+option_2_header: Warchest hadjárat fájlja
+option_2_text: Nyisd meg a Warchest hadjáratot a Csetepaté-hadjárat menüből.
+option_3_header: Extreme hadjárat fájlja
+option_3_text: Nyisd meg az Extreme hadjáratot az Extreme Csetepaté-hadjárat menüjéből.
+option_4_header: Hadjáratfájlok ellenőrzése indításkor
+option_4_text: Részletes hibákat jelent a hadjáratfájlokban a játék indításakor.
+tags.scenarios: Forgatókönyvek
+tags.maps: Térképek
+trail_category: Egyéni csetepaté-hadjáratok

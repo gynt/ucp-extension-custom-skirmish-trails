@@ -1,0 +1,12 @@
+trail_source_text: 选择征程 JSON 或 CSV 文件。留空则保留游戏原版征程。
+option_1_header: 初版征程文件
+option_1_text: 在遭遇战征程中打开初版征程。
+option_2_header: Warchest 征程文件
+option_2_text: 在遭遇战征程中打开 Warchest 征程。
+option_3_header: Extreme 征程文件
+option_3_text: 在 Extreme 版的遭遇战征程中打开 Extreme 征程。
+option_4_header: 启动时检查征程文件
+option_4_text: 游戏启动时报告征程文件中的详细错误。
+tags.scenarios: 场景
+tags.maps: 地图
+trail_category: 自定义遭遇战征程

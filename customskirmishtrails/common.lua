@@ -83,7 +83,11 @@ local resources_array = {
   "ironarmor",
 }
 
+-- A player's skirmish colour is its player slot; the human player has slot 1.
+local COLORS = { red = 1, orange = 2, yellow = 3, blue = 4, black = 5, purple = 6, lightblue = 7, green = 8 }
+
 return {
+  COLORS = COLORS,
   RESOURCES  = RESOURCES,
   resources = resources,
   resources_array = resources_array,

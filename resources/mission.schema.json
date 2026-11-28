@@ -1,0 +1,318 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/gynt/ucp-extension-custom-skirmish-trails/resources/mission.schema.json",
+  "title": "Custom Skirmish Trails: mission file (format 1)",
+  "description": "One mission of a trail, the same data as one line of the trail csv file. Use tools/convert_trail.py to switch formats.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Optional schema path or URL for editor validation and hover help.",
+      "type": "string"
+    },
+    "format": {
+      "description": "Required mission file format number, currently 1.",
+      "const": 1
+    },
+    "map_name": {
+      "description": "Required map filename for the mission, with or without .map; scenario maps use a bare Latin-1 filename of at most 200 bytes.",
+      "type": "string"
+    },
+    "mission_name": {
+      "description": "Mission title in the briefing, blank if omitted and replaceable by a language file.",
+      "type": "string"
+    },
+    "mission_type": {
+      "description": "How the mission starts. skirmish (the default): the trail sets up a skirmish on the map. scenario: a map made as a scenario, with its own players, goals and events, started as Play a Map starts it. skirmish_scenario: a skirmish saved as a map and then edited as a scenario, started as Play a Map starts it and played as the trail's skirmish mission (Restart, saves, troop limit and win go by the trail). A map whose saved game mode doesn't match is reported in the log.",
+      "type": "string",
+      "enum": [
+        "skirmish",
+        "scenario",
+        "skirmish_scenario"
+      ]
+    },
+    "difficulty_scaling": {
+      "description": "Scenario and skirmish_scenario missions only. vanilla (the default): what Play a Map does at the game's Normal difficulty, which cuts the placed starting army (every 4th military unit until about a quarter of its value is gone) on a map without invasion events. none: the placed starting army stays whole, also on Restart.",
+      "type": "string",
+      "enum": [
+        "vanilla",
+        "none"
+      ]
+    },
+    "unit_limit": {
+      "description": "The player's troop limit, never above the game's skirmish limit for the living lords. Omit it for the game's own limit (none in a scenario). Give either formula or by_alive.",
+      "type": "object",
+      "oneOf": [
+        {
+          "properties": {
+            "formula": {
+              "description": "base divided by the living lords, minus offset; base 2400 and offset 40 are Crusader's limits.",
+              "type": "object",
+              "properties": {
+                "base": { "type": "integer", "minimum": 1, "maximum": 100000 },
+                "offset": { "type": "integer", "minimum": 0, "maximum": 100000 }
+              },
+              "required": ["base", "offset"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["formula"],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "by_alive": {
+              "description": "The limit at the listed numbers of living lords, each count once; counts between two listed ones are interpolated and rounded down, counts outside them take the nearest listed limit.",
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "lords": { "type": "integer", "minimum": 1, "maximum": 8 },
+                  "limit": { "type": "integer", "minimum": 0, "maximum": 100000 }
+                },
+                "required": ["lords", "limit"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["by_alive"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "scenario_briefing": {
+      "description": "Scenario missions only: the game's briefing text for this mission, shown instead of the map's own description, at most 999 bytes. A language file can give its own; omit to keep the map's text.",
+      "type": "string"
+    },
+    "text_description": {
+      "description": "Up to eight briefing lines in order, with missing lines left blank.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 8
+    },
+    "advantage": {
+      "description": "Starting advantage from human_large through human_small, neutral and ai_small to ai_large (1-5 in that order); omission supplies no advantage override.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "human_large",
+            "human_small",
+            "neutral",
+            "ai_small",
+            "ai_large"
+          ]
+        },
+        {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        }
+      ]
+    },
+    "start_mode": {
+      "description": "Starting conditions for normal, crusader or deathmatch (1-3 in that order); omission supplies no start mode override.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "normal",
+            "crusader",
+            "deathmatch"
+          ]
+        },
+        {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        }
+      ]
+    },
+    "players": {
+      "description": "Required list of one to eight players, with the human first and AI opponents or allies after them.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": [
+        {
+          "type": "object",
+          "description": "players[0]: the human player (player 1). Has no \"ai\".",
+          "properties": {
+            "lord": {
+              "description": "Use Arab or Europ for the player's lord and starting troops, or omit to keep the player's choice.",
+              "type": "string",
+              "enum": [
+                "Arab",
+                "Europ"
+              ]
+            },
+            "skip_start_units": {
+              "description": "Use 1 to start with only the lord, or 0 or omission to keep the starting troops.",
+              "type": "integer",
+              "enum": [
+                0,
+                1
+              ]
+            },
+            "name": {
+              "description": "Name shown in the briefing and game; empty or omitted keeps the usual name. Language files translate it as player<N>_name (N = this entry's place in players, from 1).",
+              "type": "string"
+            },
+            "start_position": {
+              "description": "Map starting position number as a non-negative integer, left unset if omitted.",
+              "type": "integer",
+              "minimum": 0
+            },
+            "team": {
+              "description": "Team number as a non-negative integer, with matching team numbers grouping players; omit to leave it unset.",
+              "type": "integer",
+              "minimum": 0
+            },
+            "aiv_type": {
+              "description": "AI castle layout index as a non-negative integer, left unset if omitted.",
+              "type": "integer",
+              "minimum": 0
+            },
+            "gold": {
+              "description": "This player's start gold; 0 is no gold. Left out: the game's start gold for the advantage and start mode. Not used in a scenario mission (see 'Start gold in scenario missions' in docs/trail-files.md).",
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "not": {
+            "required": [
+              "ai"
+            ]
+          },
+          "additionalProperties": false
+        }
+      ],
+      "additionalItems": {
+        "type": "object",
+        "description": "players[1..7]: AI players. Has no \"lord\".",
+        "properties": {
+          "ai": {
+            "description": "Required AI key such as SK_RAT or its alias from ai_character_mapping.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name shown in the briefing and game; empty or omitted keeps the usual name. Language files translate it as player<N>_name (N = this entry's place in players, from 1).",
+            "type": "string"
+          },
+          "start_position": {
+            "description": "Map starting position number as a non-negative integer, left unset if omitted.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "team": {
+            "description": "Team number as a non-negative integer, with matching team numbers grouping players; omit to leave it unset.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "aiv_type": {
+            "description": "AI castle layout index as a non-negative integer, left unset if omitted.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "gold": {
+            "description": "This player's start gold; 0 is no gold. Left out: the game's start gold for the advantage and start mode. Not used in a scenario mission (see 'Start gold in scenario missions' in docs/trail-files.md).",
+            "type": "integer",
+            "minimum": 0
+          },
+          "color": {
+            "description": "The colour this AI plays in: orange, yellow, blue, black, purple, lightblue or green (or 2-8 in that order); red is always you. The AI takes that colour's player slot. An AI without a colour keeps its slot when it is free, else takes the first free one.",
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "orange",
+                  "yellow",
+                  "blue",
+                  "black",
+                  "purple",
+                  "lightblue",
+                  "green"
+                ]
+              },
+              {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 8
+              }
+            ]
+          }
+        },
+        "required": [
+          "ai"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "producible": {
+      "description": "Weapon production switches keyed by CSV suffix (for example bows), where 1 enables and 0 disables; omitted entries keep the game's rules.",
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "integer",
+          "string"
+        ]
+      }
+    },
+    "recruitable": {
+      "description": "Recruitment switches keyed by CSV suffix (for example archers), where 1 enables and 0 disables; omitted entries keep the game's rules.",
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "integer",
+          "string"
+        ]
+      }
+    },
+    "resources": {
+      "description": "Starting stock keyed by CSV suffix (for example wood), with counts as integers or numeric text; omitted entries keep the game's starting stock.",
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "integer",
+          "string"
+        ]
+      }
+    },
+    "tradeable": {
+      "description": "Market trading switches keyed by CSV suffix (for example wood), where 1 enables and 0 disables; omitted entries keep the game's rules.",
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "integer",
+          "string"
+        ]
+      }
+    },
+    "icon": {
+      "description": "Door pictures of the mission from mission_icons, one per state and each optional; a state without a picture, or with a picture outside the sheet, shows the game's own marker. A mission off the trail's order (a side mission, a parallel path) needs its available picture.",
+      "type": "object",
+      "properties": {
+        "locked": { "description": "Picture index (from 0) while the mission can't be clicked yet. Leave it out to draw nothing until it opens.", "type": "integer", "minimum": 0 },
+        "available": { "description": "Picture index (from 0) while the mission can be clicked. Leave it out to show the game's marker of the next mission. With it, the door also stays locked until its date and its map.", "type": "integer", "minimum": 0 },
+        "won": { "description": "Picture index (from 0) drawn over the available picture after a win (not after a chicken). Leave it out to show the game's flag.", "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "extra": {
+      "description": "Additional CSV columns as text, with conflicting values overriding structured fields; omit if you have none.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "format",
+    "map_name",
+    "players"
+  ],
+  "additionalProperties": false
+}

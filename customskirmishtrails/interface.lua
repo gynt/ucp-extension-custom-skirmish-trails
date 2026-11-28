@@ -1,17 +1,11 @@
 
-local memory = require("customskirmishtrails.memory")
+local common = require("customskirmishtrails.common")
 local tradeability = require("customskirmishtrails.tradeability")
 local producibility = require("customskirmishtrails.producibility")
 local recruitability = require("customskirmishtrails.recruitability")
 local descriptiveTexts = require("customskirmishtrails.descriptive_texts")
 local startgoods = require("customskirmishtrails.start_goods")
-local startgold = require("customskirmishtrails.startgold")
-
--- 
-local function setStartGold(value)
-  log(2, string.format("setStartGold: %s @ %X: %s", "gold",memory.START_GOLD, value))
-  core.writeInteger(memory.START_GOLD, value) -- check intesnity value validity
-end
+local patches = require("customskirmishtrails.patches")
 
 local PLAYER_MAPPING = {
   ["SK_RAT"] = 1,
@@ -35,6 +29,30 @@ local PLAYER_MAPPING = {
 local STRING_ADDRESSES = {
 
 }
+
+-- per trail: alias -> AI key, from the trail settings file's ai_character_mapping
+local AI_ALIASES = {}
+
+local function setAiAliases(trail, mapping)
+  local aliases = {}
+  for key, alias in pairs(mapping or {}) do
+    aliases[alias] = key
+  end
+  AI_ALIASES[trail] = aliases
+end
+
+---The game's AI id for a player cell: an AI key ("SK_RAT"), an alias from the trail settings
+---file's ai_character_mapping, or a number (0 for an empty slot).
+local function playerValue(value, trail)
+  if PLAYER_MAPPING[value] ~= nil then
+    return PLAYER_MAPPING[value]
+  end
+  local aliases = AI_ALIASES[trail]
+  if aliases ~= nil and aliases[value] ~= nil and PLAYER_MAPPING[aliases[value]] ~= nil then
+    return PLAYER_MAPPING[aliases[value]]
+  end
+  return math.tointeger(tonumber(value)) or 0
+end
 
 local ENTRY_OFFSETS = {
   ["map_name"] = 0*4,
@@ -80,12 +98,73 @@ local ENTRY_OFFSETS = {
   ["aiv_type8"] = 35*4,
 }
 
+local SLOT_COLUMNS = { "player%d", "start_position%d", "team%d", "aiv_type%d", "gold_player_%d", "player%d_name",
+  "player%d_color" }
+local EMPTY_SLOT = { "player%d", "start_position%d", "team%d", "aiv_type%d" }
+
+local function hasAi(entry, player)
+  local value = entry["player" .. player]
+  return value ~= nil and value ~= "" and tonumber(value) ~= 0
+end
+
+---Moves each AI player with a player<N>_color into the slot of that colour. The other AI
+---players keep their slot when it is free and take the first free one otherwise.
+local function applyColors(entry, where)
+  local players = math.min(math.tointeger(tonumber(entry.num_players)) or 8, 8)
+  local slots, taken, any = {}, { [1] = true }, false
+  for player = 2, players do
+    local value = entry[string.format("player%d_color", player)]
+    if hasAi(entry, player) and value ~= nil and value ~= "" then
+      local slot = common.COLORS[tostring(value):lower()] or math.tointeger(tonumber(value))
+      if slot == nil or slot < 2 or slot > 8 or taken[slot] then
+        log(WARNING, string.format("%s: player%d_color %s is not a free AI colour",
+          where, player, tostring(value)))
+      else
+        slots[player], taken[slot], any = slot, true, true
+      end
+    end
+  end
+  if not any then
+    return
+  end
+  local last = players
+  for player = 2, players do
+    if slots[player] == nil and hasAi(entry, player) then
+      local slot = player
+      if taken[slot] then
+        slot = 2
+        while taken[slot] do
+          slot = slot + 1
+        end
+      end
+      slots[player], taken[slot] = slot, true
+    end
+    last = math.max(last, slots[player] or 0)
+  end
+  local moved = {}
+  for player, slot in pairs(slots) do
+    for _, column in ipairs(SLOT_COLUMNS) do
+      moved[column:format(slot)] = entry[column:format(player)]
+    end
+  end
+  for slot = 2, 8 do
+    for _, column in ipairs(SLOT_COLUMNS) do
+      entry[column:format(slot)] = moved[column:format(slot)]
+    end
+    if not taken[slot] then
+      for _, column in ipairs(EMPTY_SLOT) do
+        entry[column:format(slot)] = 0
+      end
+    end
+  end
+  entry.num_players = last
+end
+
 local function commitEntry(addr, index, entry, trail)
   local offset = addr + 144 * (index - 1)
-  log(2, string.format("commitEntry: %s %X %s %X", entry, addr, index - 1, offset))
 
   local missionName = entry.mission_name
-  if missionName ~=  nil then
+  if missionName ~= nil and modules.textResourceModifier.SetText ~= nil then
     if trail == "firstEditionTrail" then
       -- first edition
       modules.textResourceModifier:SetText(0xF5, 0x01 + (index - 1), missionName)      
@@ -106,14 +185,12 @@ local function commitEntry(addr, index, entry, trail)
     core.writeString(mapNameAddress, mapName)
     STRING_ADDRESSES[mapName] = mapNameAddress
 
-    log(2, string.format("commitEntry: map name: %s", mapName))
   end
 
   local mapNameAddress = STRING_ADDRESSES[mapName]
   for name, value in pairs(entry) do
     
     if name == "map_name" then
-      -- log(2, string.format("commitEntry: writing map name: %X", mapNameAddress))
       value = mapNameAddress
       -- core.writeInteger(offset + ENTRY_OFFSETS["map_name"], value)
     end
@@ -122,9 +199,8 @@ local function commitEntry(addr, index, entry, trail)
       local fieldOffset = ENTRY_OFFSETS[name]
       if fieldOffset ~= nil then
         if name:sub(1, ("player"):len()) == "player" then
-          value = PLAYER_MAPPING[value]
+          value = playerValue(value, trail)
         end
-        log(2, string.format("commitEntry: %s @ %X: %s", name,offset + fieldOffset, value))
         core.writeInteger(offset + fieldOffset, value)
       end
     else
@@ -134,8 +210,7 @@ local function commitEntry(addr, index, entry, trail)
 end
 
 local function commitEntryExtra(entry)
-  log(VERBOSE, string.format("commitEntryExtra: %s", entry))
-  log(VERBOSE, string.format("commitEntryExtra: data: %s", json:encode(entry)))
+  -- no json:encode(entry) here: UCP's JSON encoder crashed the game in ucrtbase
 
   -- set somewhere else!
   -- startgoods.setStartGoods(entry)
@@ -145,23 +220,23 @@ local function commitEntryExtra(entry)
   recruitability.setUnitsRecruitable(entry)
 
   tradeability.setTradeables(entry)
+
+  patches.applyPlayerNames(entry)
+  patches.applyLord(entry)
+  startgoods.skipStartUnits(entry)
 end
 
 local function commitTextDescription(entry)
-  log(VERBOSE, string.format("commitTextDescription: %s => %s", entry, entry.text_description_line_01))
   descriptiveTexts.setTextDescriptions(entry)
-end
-
-local function commitStartGoldDisplay(entry)
-  log(VERBOSE, string.format("commitStartGoldDisplay: %s => %s", entry, entry.gold_player_2))
-  startgold.setStartGoldDisplay(entry)
 end
 
 return {
   commitEntry = commitEntry,
   commitEntryExtra = commitEntryExtra,
   commitTextDescription = commitTextDescription,
-  commitStartGoldDisplay = commitStartGoldDisplay,
+  applyColors = applyColors,
+  hasAi = hasAi,
   setStartGoods = startgoods.setStartGoods,
+  setAiAliases = setAiAliases,
   STRING_ADDRESSES = STRING_ADDRESSES,
 }

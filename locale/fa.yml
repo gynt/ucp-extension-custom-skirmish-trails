@@ -1,0 +1,12 @@
+trail_source_text: یک فایل JSON یا CSV مسیر انتخاب کنید. برای حفظ مسیر اصلی بازی خالی بگذارید.
+option_1_header: فایل مسیر نسخهٔ اول
+option_1_text: مسیر نسخهٔ اول را از «مسیر نبرد آزاد» باز کنید.
+option_2_header: فایل مسیر Warchest
+option_2_text: مسیر Warchest را از «مسیر نبرد آزاد» باز کنید.
+option_3_header: فایل مسیر Extreme
+option_3_text: مسیر Extreme را در نسخهٔ Extreme از «مسیر نبرد آزاد» باز کنید.
+option_4_header: بررسی فایل‌های مسیر در آغاز بازی
+option_4_text: خطاهای دقیق فایل‌های مسیر را هنگام آغاز بازی گزارش می‌دهد.
+tags.scenarios: سناریوها
+tags.maps: نقشه‌ها
+trail_category: مسیرهای نبرد آزاد سفارشی

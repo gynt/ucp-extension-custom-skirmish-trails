@@ -1,0 +1,12 @@
+trail_source_text: Wähle eine Marsch-JSON- oder CSV-Datei. Leer lassen, um den Spielmarsch zu behalten.
+option_1_header: Kreuzzugsmarsch-Datei (First Edition)
+option_1_text: Öffne den First-Edition-Marsch über Kreuzzugsmarsch.
+option_2_header: Warchest-Marschdatei
+option_2_text: Öffne den Warchest-Marsch über Kreuzzugsmarsch.
+option_3_header: Extreme-Marschdatei
+option_3_text: Öffne den Extreme-Marsch in Extreme über Kreuzzugsmarsch.
+option_4_header: Marschdateien beim Start prüfen
+option_4_text: Meldet beim Spielstart detaillierte Fehler in Marschdateien.
+tags.scenarios: Szenarien
+tags.maps: Karten
+trail_category: Eigene Kreuzzugsmärsche

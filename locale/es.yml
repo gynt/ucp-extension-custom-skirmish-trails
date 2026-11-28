@@ -1,0 +1,12 @@
+trail_source_text: Selecciona un archivo JSON o CSV de senda. Déjalo vacío para conservar la senda del juego.
+option_1_header: Archivo de senda Primera Edición
+option_1_text: Abre la senda Primera Edición desde Senda de escaramuzas.
+option_2_header: Archivo de senda Warchest
+option_2_text: Abre la senda Warchest desde Senda de escaramuzas.
+option_3_header: Archivo de senda Extreme
+option_3_text: Abre la senda Extreme desde Senda de escaramuzas en Extreme.
+option_4_header: Comprobar archivos de senda al iniciar
+option_4_text: Informa de errores detallados en los archivos de senda al iniciar el juego.
+tags.scenarios: Escenarios
+tags.maps: Mapas
+trail_category: Sendas de escaramuza personalizadas

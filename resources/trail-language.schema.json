@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Custom Skirmish Trails language file",
+  "description": "Optional text overrides for one trail in one game language.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "trail_title": {
+      "description": "Translated title under the trail button; omit or leave empty to keep the original title.",
+      "type": "string"
+    },
+    "trail_summary": {
+      "description": "Translated summary under the trail title; omit or leave empty to keep the original summary.",
+      "type": "string"
+    },
+    "mission_locked_text": {
+      "description": "Translated briefing for a dated scenario that has yet to open, with {date} filled in; omit or leave empty to keep the original text.",
+      "type": "string"
+    },
+    "missions": {
+      "description": "Translations keyed by mission number as text, starting at \"1\", or by node id when the trail's route names its missions by file; omission keeps the original mission text.",
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z0-9_-]+$": {
+          "description": "Translations for this mission (number or node id); omitted entries keep their original text.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mission_name": {
+              "description": "Translated mission title in the briefing; omission keeps the original title.",
+              "type": "string"
+            },
+            "text_description_line_01": {
+              "description": "Translated briefing line 1; omission keeps the original line.",
+              "type": "string"
+            },
+            "text_description_line_02": {
+              "description": "Translated briefing line 2; omission keeps the original line.",
+              "type": "string"
+            },
+            "text_description_line_03": {
+              "description": "Translated briefing line 3; omission keeps the original line.",
+              "type": "string"
+            },
+            "text_description_line_04": {
+              "description": "Translated briefing line 4; omission keeps the original line.",
+              "type": "string"
+            },
+            "text_description_line_05": {
+              "description": "Translated briefing line 5; omission keeps the original line.",
+              "type": "string"
+            },
+            "text_description_line_06": {
+              "description": "Translated briefing line 6; omission keeps the original line.",
+              "type": "string"
+            },
+            "text_description_line_07": {
+              "description": "Translated briefing line 7; omission keeps the original line.",
+              "type": "string"
+            },
+            "text_description_line_08": {
+              "description": "Translated briefing line 8; omission keeps the original line.",
+              "type": "string"
+            },
+            "player1_name": {
+              "description": "Translated name for the human player in the briefing and game; omission keeps the original name.",
+              "type": "string"
+            },
+            "player2_name": {
+              "description": "Translated name for player 2 in the briefing and game; omission keeps the original name.",
+              "type": "string"
+            },
+            "player3_name": {
+              "description": "Translated name for player 3 in the briefing and game; omission keeps the original name.",
+              "type": "string"
+            },
+            "player4_name": {
+              "description": "Translated name for player 4 in the briefing and game; omission keeps the original name.",
+              "type": "string"
+            },
+            "player5_name": {
+              "description": "Translated name for player 5 in the briefing and game; omission keeps the original name.",
+              "type": "string"
+            },
+            "player6_name": {
+              "description": "Translated name for player 6 in the briefing and game; omission keeps the original name.",
+              "type": "string"
+            },
+            "player7_name": {
+              "description": "Translated name for player 7 in the briefing and game; omission keeps the original name.",
+              "type": "string"
+            },
+            "player8_name": {
+              "description": "Translated name for player 8 in the briefing and game; omission keeps the original name.",
+              "type": "string"
+            },
+            "scenario_briefing": {
+              "description": "Translated briefing text of a scenario mission, shown instead of the map's own description; omission keeps the original text.",
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,13 +1,17 @@
 local common = require("customskirmishtrails.common")
 local resources = common.resources
-local _, pTradeAbilityArray
+local patches = require("customskirmishtrails.patches")
+local pTradeAbilityArray
 
 local tradeability = {}
 
 
 
 function tradeability.enable()
-  _, pTradeAbilityArray = utils.AOBExtract("89 ? I(? ? ? ?) 83 C0 08 83 C1 04 83 C6 04")
+  if pTradeAbilityArray ~= nil then return true end
+  local _, address = patches.extract("89 ? I(? ? ? ?) 83 C0 08 83 C1 04 83 C6 04")
+  pTradeAbilityArray = address
+  return address ~= nil
 end
 
 ---@param goodsType string
@@ -19,6 +23,7 @@ function tradeability.setTradeable(goodsType, binary)
     error(debug.traceback(string.format("No such goods type: %s", goodsType)))
   end
   
+  if pTradeAbilityArray == nil then return end
   local addr = pTradeAbilityArray + (4 * resources[goodsType])
   log(2, string.format("setTradeable: %s => %s (%s) @ 0x%X", goodsType, binary, binary, addr))
   core.writeInteger(addr, binary)
@@ -39,6 +44,7 @@ function tradeability.getTradeable(goodsType)
     error(debug.traceback(string.format("No such goods type: %s", goodsType)))
   end
   
+  if pTradeAbilityArray == nil then return end
   local addr = pTradeAbilityArray + (4 * resources[goodsType])
   log(2, string.format("getTradeable: %s @ 0x%X", goodsType, addr))
   return core.readInteger(addr)

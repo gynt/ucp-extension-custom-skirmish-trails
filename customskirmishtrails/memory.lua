@@ -1,71 +1,74 @@
-local _, startGoldOffsetAddr = utils.AOBExtract("8B ? ? I(? ? ? ?) 8B C8 6B C9 64")
-local _, startGoldAddr = utils.AOBExtract("89 ? I(? ? ? ?) A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? 89 44 24 10")
-local _, startGoodsAddr = utils.AOBExtract("BF I(? ? ? ?) F3 A5 89 ? ? ? ? ? ")
-local _, startingTroopsAddr = utils.AOBExtract("BE I(? ? ? ?) C7 ? ? ? ? ? ? ? 8B 44 24 10")
-local _, euroRecruitableAddr, mercRecruitableAddr = utils.AOBExtract("A3 I(? ? ? ?) A3 I(? ? ? ?) A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? 89 44 24 10")
+local patches = require("customskirmishtrails.patches")
 
--- ints: xbow, pike, sword, bow, spear, mace    0x01fe7e70
-local _, weaponProducibleAddr = utils.AOBExtract("89 ? I(? ? ? ?) 89 ? ? ? ? ? 89 ? ? ? ? ? 89 ? ? ? ? ? 89 ? ? ? ? ? 89 ? ? ? ? ? 66 ? ? ? ? ? ? 66 ? ? ? ? ? ? 89 ? ? ? ? ?")
-log(2, string.format("memory: WEAPON_PRODUCIBLE: %X", weaponProducibleAddr))
--- shorts: xbow, bow, pike, spear, sword, mace  0x01653df6
-local _, weaponProducibleSaveAddr = utils.AOBExtract("0F ? ? I(? ? ? ?) 0F ? ? ? ? ? ? 0F ? ? ? ? ? ? 0F ? ? ? ? ? ? 89 ? ? ? ? ? 0F ? ? ? ? ? ? 89 ? ? ? ? ? 0F ? ? ? ? ? ? 89 ? ? ? ? ? 0F ? ? ? ? ? ? 89 ? ? ? ? ? 0F ? ? ? ? ? ? 89 ? ? ? ? ? 0F ? ? ? ? ? ? 89 ? ? ? ? ? 0F ? ? ? ? ? ? 89 ? ? ? ? ?")
-log(2, string.format("memory: WEAPON_SAVE_PRODUCIBLE: %X", weaponProducibleSaveAddr))
-
-local _, isSkirmishTrailAddr = utils.AOBExtract("C7 ? I(? ? ? ?) ? ? ? ? 56 75 23")
-local _, currentTrailTypeAddr = utils.AOBExtract("A1 I(? ? ? ?) 83 C6 70")
-
-local _, extremeTrailProgressAddr = utils.AOBExtract("89 ? I(? ? ? ?) E8 ? ? ? ? A1 ? ? ? ? 8B ? ? ? ? ? ? 89 ? ? ? ? ?")
-local _, warchestTrailProgressAddr = utils.AOBExtract("89 ? I(? ? ? ?) E8 ? ? ? ? 8B ? ? ? ? ? 8B ? ? ? ? ? ? 89 ? ? ? ? ?")
-local _, firstEditionTrailProgressAddr = utils.AOBExtract("8B ? I(? ? ? ?) 8B ? ? ? ? ? ? 89 ? ? ? ? ? 8B C1")
-
-
-local TRAIL_TYPES = {
-  [0] = "firstEditionTrail",
-  [1] = "warchestTrail",
-  [2] = "extremeTrail",
+local memory = {
+  TRAIL_TYPES = { [0] = "firstEditionTrail", [1] = "warchestTrail", [2] = "extremeTrail" },
+  TRAIL_PROGRESS_ADDRESSES = {},
+  REGISTRY = {},
 }
 
----@type table<string, table<number, table>>
-local REGISTRY = {
-  ["firstEditionTrail"] = nil,
-  ["warchestTrail"] = nil,
-  ["extremeTrail"] = nil,
+local PROGRESS_AOBS = {
+  firstEditionTrail = "8B ? I(? ? ? ?) 8B ? ? ? ? ? ? 89 ? ? ? ? ? 8B C1",
+  warchestTrail = "89 ? I(? ? ? ?) E8 ? ? ? ? 8B ? ? ? ? ? 8B ? ? ? ? ? ? 89 ? ? ? ? ?",
+  extremeTrail = "89 ? I(? ? ? ?) E8 ? ? ? ? A1 ? ? ? ? 8B ? ? ? ? ? ? 89 ? ? ? ? ?",
 }
 
-local TRAIL_PROGRESS_ADDRESSES = {
-  ["firstEditionTrail"] = firstEditionTrailProgressAddr,
-  ["warchestTrail"] = warchestTrailProgressAddr,
-  ["extremeTrail"] = extremeTrailProgressAddr,
+local EXTRA_AOBS = {
+  START_GOODS = "BF I(? ? ? ?) F3 A5 89 ? ? ? ? ?",
+  STARTING_TROOPS = "BE I(? ? ? ?) C7 ? ? ? ? ? ? ? 8B 44 24 10",
+  WEAPON_PRODUCIBLE = "89 ? I(? ? ? ?) 89 ? ? ? ? ? 89 ? ? ? ? ? 89 ? ? ? ? ? 89 ? ? ? ? ? 89 ? ? ? ? ? 66 ? ? ? ? ? ? 66 ? ? ? ? ? ? 89 ? ? ? ? ?",
 }
 
-local function fetchCurrentTrail()
-    local isTrail = core.readInteger(isSkirmishTrailAddr) == 1
-    local trail =  core.readInteger(currentTrailTypeAddr) 
-    local trailName = TRAIL_TYPES[trail]
-
-    if trailName == nil then error(string.format("invalid trail: %s", trail)) end
-
-    local progressAddr = TRAIL_PROGRESS_ADDRESSES[trailName]
-
-    local mission = core.readInteger(progressAddr) + 1
-    
-    return isTrail, trail, trailName, mission
+function memory.bindExtra(field)
+  local _, address = patches.extract(EXTRA_AOBS[field])
+  memory[field] = address
+  return address ~= nil
 end
 
-return {
-  STARTING_TROOPS = startingTroopsAddr,
-  EURO_RECRUITABLE = euroRecruitableAddr,
-  MERC_RECRUITABLE = mercRecruitableAddr,
-  START_GOODS = startGoodsAddr,
-  START_GOLD = startGoldAddr,
-  WEAPON_PRODUCIBLE = weaponProducibleAddr,
-  IS_SKIRMISH_TRAIL = isSkirmishTrailAddr,
-  CURRENT_TRAIL_TYPE = currentTrailTypeAddr,
-  EXTREME_TRAIL_PROGRESS = extremeTrailProgressAddr,
-  WARCHEST_TRAIL_PROGRESS = warchestTrailProgressAddr,
-  FIRST_EDITION_TRAIL_PROGRESS = firstEditionTrailProgressAddr,
-  fetchCurrentTrail = fetchCurrentTrail,
-  TRAIL_PROGRESS_ADDRESSES = TRAIL_PROGRESS_ADDRESSES,
-  TRAIL_TYPES = TRAIL_TYPES,
-  REGISTRY = REGISTRY,
-}
+function memory.bindRecruitability()
+  local _, european, mercenary = patches.extract("A3 I(? ? ? ?) A3 I(? ? ? ?) A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? A3 ? ? ? ? 89 44 24 10")
+  if european == nil or mercenary == nil then return false end
+  memory.EURO_RECRUITABLE, memory.MERC_RECRUITABLE = european, mercenary
+  return true
+end
+
+function memory.bindProgress(trailName)
+  if memory.TRAIL_PROGRESS_ADDRESSES[trailName] == nil then
+    local _, address = patches.extract(PROGRESS_AOBS[trailName])
+    memory.TRAIL_PROGRESS_ADDRESSES[trailName] = address
+  end
+  return memory.TRAIL_PROGRESS_ADDRESSES[trailName]
+end
+
+function memory.bindTrailType()
+  if memory.CURRENT_TRAIL_TYPE == nil then
+    local _, address = patches.extract("A1 I(? ? ? ?) 83 C6 70")
+    memory.CURRENT_TRAIL_TYPE = address
+  end
+  return memory.CURRENT_TRAIL_TYPE ~= nil
+end
+
+function memory.bindMissionContext()
+  local _, isTrail = patches.extract("C7 ? I(? ? ? ?) ? ? ? ? 56 75 23")
+  if isTrail == nil or not memory.bindTrailType() then return false end
+  memory.IS_SKIRMISH_TRAIL = isTrail
+  return true
+end
+
+function memory.fetchCurrentTrail()
+  if memory.IS_SKIRMISH_TRAIL == nil then return false end
+  local isTrail = core.readInteger(memory.IS_SKIRMISH_TRAIL) == 1
+  local trail = core.readInteger(memory.CURRENT_TRAIL_TYPE)
+  local trailName = memory.TRAIL_TYPES[trail]
+  local address = memory.TRAIL_PROGRESS_ADDRESSES[trailName]
+  if address == nil then return isTrail, trail end
+  return isTrail, trail, trailName, core.readInteger(address) + 1
+end
+
+---The mission being prepared or played, and whether the game is in a trail.
+function memory.currentEntry()
+  local isTrail, _, trailName, mission = memory.fetchCurrentTrail()
+  local missions = memory.REGISTRY[trailName]
+  return missions ~= nil and missions[mission] or nil, isTrail
+end
+
+return memory

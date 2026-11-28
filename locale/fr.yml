@@ -1,0 +1,12 @@
+trail_source_text: Sélectionnez un fichier JSON ou CSV de campagne. Laissez vide pour garder la campagne du jeu.
+option_1_header: Fichier de campagne Première Édition
+option_1_text: Ouvrez la campagne Première Édition depuis Campagne d’escarmouche.
+option_2_header: Fichier de campagne Warchest
+option_2_text: Ouvrez la campagne Warchest depuis Campagne d’escarmouche.
+option_3_header: Fichier de campagne Extreme
+option_3_text: Ouvrez la campagne Extreme depuis Campagne d’escarmouche dans Extreme.
+option_4_header: Vérifier les fichiers de campagne au démarrage
+option_4_text: Signale les erreurs détaillées dans les fichiers de campagne au démarrage du jeu.
+tags.scenarios: Scénarios
+tags.maps: Cartes
+trail_category: Campagnes d’escarmouche personnalisées

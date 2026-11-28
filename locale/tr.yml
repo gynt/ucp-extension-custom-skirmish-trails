@@ -1,0 +1,12 @@
+trail_source_text: Bir sefer JSON veya CSV dosyası seçin. Oyunun kendi seferini korumak için boş bırakın.
+option_1_header: İlk Sürüm sefer dosyası
+option_1_text: İlk Sürüm seferini Çarpışma Seferi’nden açın.
+option_2_header: Warchest sefer dosyası
+option_2_text: Warchest seferini Çarpışma Seferi’nden açın.
+option_3_header: Extreme sefer dosyası
+option_3_text: Extreme seferini Extreme sürümündeki Çarpışma Seferi’nden açın.
+option_4_header: Başlangıçta sefer dosyalarını denetle
+option_4_text: Oyun başlangıcında sefer dosyalarındaki ayrıntılı hataları bildirir.
+tags.scenarios: Senaryolar
+tags.maps: Haritalar
+trail_category: Özel Çarpışma Seferleri

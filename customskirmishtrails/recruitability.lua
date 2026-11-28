@@ -24,6 +24,7 @@ local MERC_RECRUITABLE_OFFSETS = {
 local function getUnitRecruitable(unit)
   local euroOffset = EURO_RECRUITABLE_OFFSETS[unit]
   if euroOffset ~= nil then
+    if memory.EURO_RECRUITABLE == nil then return end
     local addr = memory.EURO_RECRUITABLE + euroOffset
     log(2, string.format("getUnitRecruitable: getting %s at %X", unit,  addr))
     return core.readInteger(addr) == 1
@@ -31,6 +32,7 @@ local function getUnitRecruitable(unit)
 
   local mercOffset = MERC_RECRUITABLE_OFFSETS[unit]
   if mercOffset ~= nil then
+    if memory.MERC_RECRUITABLE == nil then return end
     local addr = memory.MERC_RECRUITABLE + mercOffset
     log(2, string.format("getUnitRecruitable: getting %s at %X ", unit,  addr))
     return core.readInteger(addr) == 1
@@ -49,6 +51,7 @@ local function setUnitRecruitable(unit, value)
 
   local euroOffset = EURO_RECRUITABLE_OFFSETS[unit]
   if euroOffset ~= nil then
+    if memory.EURO_RECRUITABLE == nil then return end
     local addr = memory.EURO_RECRUITABLE + euroOffset
     log(2, string.format("setUnitRecruitable: setting %s at %X to %s", unit,  addr, value))
     core.writeInteger(addr, value)
@@ -57,6 +60,7 @@ local function setUnitRecruitable(unit, value)
 
   local mercOffset = MERC_RECRUITABLE_OFFSETS[unit]
   if mercOffset ~= nil then
+    if memory.MERC_RECRUITABLE == nil then return end
     local addr = memory.MERC_RECRUITABLE + mercOffset
     log(2, string.format("setUnitRecruitable: setting %s at %X to %s", unit,  addr, value))
     core.writeInteger(addr, value)

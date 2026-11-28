@@ -1,0 +1,12 @@
+trail_source_text: Select a trail JSON or CSV. Leave blank to keep the game's trail.
+option_1_header: First Edition trail file
+option_1_text: Open the First Edition trail from Skirmish Trail.
+option_2_header: Warchest trail file
+option_2_text: Open the Warchest trail from Skirmish Trail.
+option_3_header: Extreme trail file
+option_3_text: Open the Extreme trail from Skirmish Trail in Extreme.
+option_4_header: Check trail files at startup
+option_4_text: Report detailed errors in trail files at game startup.
+tags.scenarios: Scenarios
+tags.maps: Maps
+trail_category: Custom Skirmish Trails
